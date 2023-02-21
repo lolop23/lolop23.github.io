@@ -1,0 +1,1129 @@
+/* Reset =========================================== */
+/*! normalize.css v8.0.0 | MIT License | github.com/necolas/normalize.css */
+/* Document
+   ========================================================================== */
+/**
+ * 1. Correct the line height in all browsers.
+ * 2. Prevent adjustments of font size after orientation changes in iOS.
+ */
+chatroom html, .sil-widget-chatroom html {
+    line-height: 1.15;
+    /* 1 */
+    -webkit-text-size-adjust: 100%;
+    /* 2 */
+}
+
+/* Sections
+   ========================================================================== */
+/**
+ * Remove the margin in all browsers.
+ */
+chatroom body, .sil-widget-chatroom body {
+    margin: 0;
+}
+
+/**
+ * Correct the font size and margin on `h1` elements within `section` and
+ * `article` contexts in Chrome, Firefox, and Safari.
+ */
+chatroom h1, .sil-widget-chatroom h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+}
+
+/* Grouping content
+   ========================================================================== */
+/**
+ * 1. Add the correct box sizing in Firefox.
+ * 2. Show the overflow in Edge and IE.
+ */
+chatroom hr, .sil-widget-chatroom hr {
+    box-sizing: content-box;
+    /* 1 */
+    height: 0;
+    /* 1 */
+    overflow: visible;
+    /* 2 */
+}
+
+/**
+ * 1. Correct the inheritance and scaling of font size in all browsers.
+ * 2. Correct the odd `em` font sizing in all browsers.
+ */
+chatroom pre, .sil-widget-chatroom pre {
+    font-family: monospace, monospace;
+    /* 1 */
+    font-size: 1em;
+    /* 2 */
+}
+
+/* Text-level semantics
+   ========================================================================== */
+/**
+ * Remove the gray background on active links in IE 10.
+ */
+chatroom a, .sil-widget-chatroom a {
+    background-color: transparent;
+}
+
+/**
+ * 1. Remove the bottom border in Chrome 57-
+ * 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.
+ */
+chatroom abbr[title], .sil-widget-chatroom abbr[title] {
+    border-bottom: none;
+    /* 1 */
+    text-decoration: underline;
+    /* 2 */
+    text-decoration: underline dotted;
+    /* 2 */
+}
+
+/**
+ * Add the correct font weight in Chrome, Edge, and Safari.
+ */
+chatroom b, .sil-widget-chatroom b,
+chatroom strong, .sil-widget-chatroom strong {
+    font-weight: bolder;
+}
+
+/**
+ * 1. Correct the inheritance and scaling of font size in all browsers.
+ * 2. Correct the odd `em` font sizing in all browsers.
+ */
+chatroom code, .sil-widget-chatroom code,
+chatroom kbd, .sil-widget-chatroom kbd,
+chatroom samp, .sil-widget-chatroom samp {
+    font-family: monospace, monospace;
+    /* 1 */
+    font-size: 1em;
+    /* 2 */
+}
+
+/**
+ * Add the correct font size in all browsers.
+ */
+chatroom small, .sil-widget-chatroom small {
+    font-size: 80%;
+}
+
+/**
+ * Prevent `sub` and `sup` elements from affecting the line height in
+ * all browsers.
+ */
+chatroom sub, .sil-widget-chatroom sub,
+chatroom sup, .sil-widget-chatroom sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+chatroom sub, .sil-widget-chatroom sub {
+    bottom: -0.25em;
+}
+
+chatroom sup, .sil-widget-chatroom sup {
+    top: -0.5em;
+}
+
+/* Embedded content
+   ========================================================================== */
+/**
+ * Remove the border on images inside links in IE 10.
+ */
+chatroom img, .sil-widget-chatroom img {
+    border-style: none;
+}
+
+/* Forms
+   ========================================================================== */
+/**
+ * 1. Change the font styles in all browsers.
+ * 2. Remove the margin in Firefox and Safari.
+ */
+chatroom button, .sil-widget-chatroom button,
+chatroom input, .sil-widget-chatroom input,
+chatroom optgroup, .sil-widget-chatroom optgroup,
+chatroom select, .sil-widget-chatroom select,
+chatroom textarea, .sil-widget-chatroom textarea {
+    font-family: inherit;
+    /* 1 */
+    font-size: 100%;
+    /* 1 */
+    line-height: 1.15;
+    /* 1 */
+    margin: 0;
+    /* 2 */
+}
+
+/**
+ * Show the overflow in IE.
+ * 1. Show the overflow in Edge.
+ */
+chatroom button, .sil-widget-chatroom button,
+chatroom input, .sil-widget-chatroom input {
+    /* 1 */
+    overflow: visible;
+}
+
+/**
+ * Remove the inheritance of text transform in Edge, Firefox, and IE.
+ * 1. Remove the inheritance of text transform in Firefox.
+ */
+chatroom button, .sil-widget-chatroom button,
+chatroom select, .sil-widget-chatroom select {
+    /* 1 */
+    text-transform: none;
+}
+
+/**
+ * Correct the inability to style clickable types in iOS and Safari.
+ */
+chatroom button, .sil-widget-chatroom button,
+chatroom [type="button"], .sil-widget-chatroom [type="button"],
+chatroom [type="reset"], .sil-widget-chatroom [type="reset"],
+chatroom [type="submit"], .sil-widget-chatroom [type="submit"] {
+    -webkit-appearance: button;
+}
+
+/**
+ * Remove the inner border and padding in Firefox.
+ */
+chatroom button::-moz-focus-inner, .sil-widget-chatroom button::-moz-focus-inner,
+chatroom [type="button"]::-moz-focus-inner, .sil-widget-chatroom [type="button"]::-moz-focus-inner,
+chatroom [type="reset"]::-moz-focus-inner, .sil-widget-chatroom [type="reset"]::-moz-focus-inner,
+chatroom [type="submit"]::-moz-focus-inner, .sil-widget-chatroom [type="submit"]::-moz-focus-inner {
+    border-style: none;
+    padding: 0;
+}
+
+/**
+ * Restore the focus styles unset by the previous rule.
+ */
+chatroom button:-moz-focusring, .sil-widget-chatroom button:-moz-focusring,
+chatroom [type="button"]:-moz-focusring, .sil-widget-chatroom [type="button"]:-moz-focusring,
+chatroom [type="reset"]:-moz-focusring, .sil-widget-chatroom [type="reset"]:-moz-focusring,
+chatroom [type="submit"]:-moz-focusring, .sil-widget-chatroom [type="submit"]:-moz-focusring {
+    outline: 1px dotted ButtonText;
+}
+
+/**
+ * Correct the padding in Firefox.
+ */
+chatroom fieldset, .sil-widget-chatroom fieldset {
+    padding: 0.35em 0.75em 0.625em;
+}
+
+/**
+ * 1. Correct the text wrapping in Edge and IE.
+ * 2. Correct the color inheritance from `fieldset` elements in IE.
+ * 3. Remove the padding so developers are not caught out when they zero out
+ *    `fieldset` elements in all browsers.
+ */
+chatroom legend, .sil-widget-chatroom legend {
+    box-sizing: border-box;
+    /* 1 */
+    color: inherit;
+    /* 2 */
+    display: table;
+    /* 1 */
+    max-width: 100%;
+    /* 1 */
+    padding: 0;
+    /* 3 */
+    white-space: normal;
+    /* 1 */
+}
+
+/**
+ * Add the correct vertical alignment in Chrome, Firefox, and Opera.
+ */
+chatroom progress, .sil-widget-chatroom progress {
+    vertical-align: baseline;
+}
+
+/**
+ * Remove the default vertical scrollbar in IE 10+.
+ */
+chatroom textarea, .sil-widget-chatroom textarea {
+    overflow: auto;
+}
+
+/**
+ * 1. Add the correct box sizing in IE 10.
+ * 2. Remove the padding in IE 10.
+ */
+chatroom [type="checkbox"], .sil-widget-chatroom [type="checkbox"],
+chatroom [type="radio"], .sil-widget-chatroom [type="radio"] {
+    box-sizing: border-box;
+    /* 1 */
+    padding: 0;
+    /* 2 */
+}
+
+/**
+ * Correct the cursor style of increment and decrement buttons in Chrome.
+ */
+chatroom [type="number"]::-webkit-inner-spin-button, .sil-widget-chatroom [type="number"]::-webkit-inner-spin-button,
+chatroom [type="number"]::-webkit-outer-spin-button, .sil-widget-chatroom [type="number"]::-webkit-outer-spin-button {
+    height: auto;
+}
+
+/**
+ * 1. Correct the odd appearance in Chrome and Safari.
+ * 2. Correct the outline style in Safari.
+ */
+chatroom [type="search"], .sil-widget-chatroom [type="search"] {
+    -webkit-appearance: textfield;
+    /* 1 */
+    outline-offset: -2px;
+    /* 2 */
+}
+
+/**
+ * Remove the inner padding in Chrome and Safari on macOS.
+ */
+chatroom [type="search"]::-webkit-search-decoration, .sil-widget-chatroom [type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+}
+
+/**
+ * 1. Correct the inability to style clickable types in iOS and Safari.
+ * 2. Change font properties to `inherit` in Safari.
+ */
+chatroom ::-webkit-file-upload-button, .sil-widget-chatroom ::-webkit-file-upload-button {
+    -webkit-appearance: button;
+    /* 1 */
+    font: inherit;
+    /* 2 */
+}
+
+/* Interactive
+   ========================================================================== */
+/*
+ * Add the correct display in Edge, IE 10+, and Firefox.
+ */
+chatroom details, .sil-widget-chatroom details {
+    display: block;
+}
+
+/*
+ * Add the correct display in all browsers.
+ */
+chatroom summary, .sil-widget-chatroom summary {
+    display: list-item;
+}
+
+/* Misc
+   ========================================================================== */
+/**
+ * Add the correct display in IE 10+.
+ */
+chatroom template, .sil-widget-chatroom template {
+    display: none;
+}
+
+/**
+ * Add the correct display in IE 10.
+ */
+chatroom [hidden], .sil-widget-chatroom [hidden] {
+    display: none;
+}
+
+/* Base framework components =========================================== */
+/*#############################################################|
+|  >>> THEME
+*##############################################################*/
+/*
+1) Change the $theme variable below to your desired theme.
+2) Start your sass and change the file name output to your desired theme name.
+eg.: sass --watch style.scss:scratch-vanilla.css
+
+3) update main.html to the new generated css file
+4) Enjoy your new theme!
+*/
+chatroom .btn-bawkbox-widgets, .sil-widget-chatroom .btn-bawkbox-widgets {
+    color: white;
+    text-align: center;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    padding: 0.8rem;
+    border-radius: 4.1px;
+    border: none;
+    outline: none;
+    width: fit-content;
+    margin-top: 1rem;
+    display: inline-block;
+    float: left;
+    margin-right: 1rem;
+}
+
+chatroom .btn-block, .sil-widget-chatroom .btn-block {
+    max-width: none !important;
+    width: 100%;
+}
+
+chatroom .btn-widgets-primary, .sil-widget-chatroom .btn-widgets-primary {
+    background-color: #464646;
+    color: white;
+}
+
+chatroom .btn-widgets-secondary, .sil-widget-chatroom .btn-widgets-secondary {
+    background-color: #e45336;
+    color: white;
+}
+
+chatroom .btn-align-right, .sil-widget-chatroom .btn-align-right {
+    float: right;
+    margin-right: 0;
+}
+
+chatroom .btn-upload-file, .sil-widget-chatroom .btn-upload-file {
+    max-width: 300px !important;
+}
+
+chatroom .heartbeat, .sil-widget-chatroom .heartbeat {
+    -webkit-animation: heartbeat 1.5s ease-in-out infinite both;
+    animation: heartbeat 1.5s ease-in-out infinite both;
+}
+
+/* ----------------------------------------------
+ * Generated by Animista on 2018-10-31 13:50:45
+ * w: http://animista.net, t: @cssanimista
+ * ---------------------------------------------- */
+/**
+ * ----------------------------------------
+ * animation heartbeat
+ * ----------------------------------------
+ */
+@-webkit-keyframes heartbeat {
+    from, from {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        -webkit-transform-origin: center center;
+        transform-origin: center center;
+        -webkit-animation-timing-function: ease-out;
+        animation-timing-function: ease-out;
+    }
+    10%, 10% {
+        -webkit-transform: scale(0.91);
+        transform: scale(0.91);
+        -webkit-animation-timing-function: ease-in;
+        animation-timing-function: ease-in;
+    }
+    17%, 17% {
+        -webkit-transform: scale(0.98);
+        transform: scale(0.98);
+        -webkit-animation-timing-function: ease-out;
+        animation-timing-function: ease-out;
+    }
+    33%, 33% {
+        -webkit-transform: scale(0.87);
+        transform: scale(0.87);
+        -webkit-animation-timing-function: ease-in;
+        animation-timing-function: ease-in;
+    }
+    45%, 45% {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        -webkit-animation-timing-function: ease-out;
+        animation-timing-function: ease-out;
+    }
+}
+@keyframes heartbeat {
+    from, from {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        -webkit-transform-origin: center center;
+        transform-origin: center center;
+        -webkit-animation-timing-function: ease-out;
+        animation-timing-function: ease-out;
+    }
+    10%, 10% {
+        -webkit-transform: scale(0.91);
+        transform: scale(0.91);
+        -webkit-animation-timing-function: ease-in;
+        animation-timing-function: ease-in;
+    }
+    17%, 17% {
+        -webkit-transform: scale(0.98);
+        transform: scale(0.98);
+        -webkit-animation-timing-function: ease-out;
+        animation-timing-function: ease-out;
+    }
+    33%, 33% {
+        -webkit-transform: scale(0.87);
+        transform: scale(0.87);
+        -webkit-animation-timing-function: ease-in;
+        animation-timing-function: ease-in;
+    }
+    45%, 45% {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        -webkit-animation-timing-function: ease-out;
+        animation-timing-function: ease-out;
+    }
+}
+chatroom .bawkbox-widgets-input, .sil-widget-chatroom .bawkbox-widgets-input {
+    border-radius: 3px;
+    background-color: white;
+    border: 1px solid #acacac;
+    outline: none;
+    padding: 0.8rem;
+    font-size: 0.9rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding-left: 1rem;
+    box-sizing: border-box;
+}
+
+chatroom .bawkbox-widgets-input::placeholder, .sil-widget-chatroom .bawkbox-widgets-input::placeholder,
+chatroom .bawkbox-widgets-textarea::placeholder, .sil-widget-chatroom .bawkbox-widgets-textarea::placeholder {
+    font-size: 0.8rem;
+    text-transform: lowercase;
+    font-weight: 600;
+    color: #b4b4b4;
+}
+
+chatroom .bawkbox-widgets-textarea, .sil-widget-chatroom .bawkbox-widgets-textarea {
+    position: relative;
+    border-radius: 3px;
+    background-color: white;
+    border: 1px solid #acacac;
+    outline: none;
+    padding: 0.8rem;
+    font-size: 0.9rem;
+    width: 100%;
+    resize: none;
+    margin-top: 1rem;
+    box-sizing: border-box;
+}
+
+chatroom .bawkbox-textarea-wrapper, .sil-widget-chatroom .bawkbox-textarea-wrapper {
+    position: relative;
+}
+
+chatroom .bawkbox-powered-by, .sil-widget-chatroom .bawkbox-powered-by {
+    position: absolute;
+    bottom: 1rem;
+    color: #b4b4b4;
+    font-size: 0.6rem;
+    left: 0;
+    width: 100%;
+    text-align: right;
+    padding-right: 1rem;
+}
+
+chatroom .bawkbox-powered-by-logo, .sil-widget-chatroom .bawkbox-powered-by-logo {
+    max-width: 50px;
+    padding-left: 0.2rem;
+}
+
+/* Custom upload button =========================================== */
+chatroom .upload-btn-wrapper, .sil-widget-chatroom .upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+chatroom .btn, .sil-widget-chatroom .btn {
+    border: 2px solid gray;
+    color: gray;
+    background-color: white;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+chatroom .upload-btn-wrapper input[type="file"], .sil-widget-chatroom .upload-btn-wrapper input[type="file"] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+}
+
+/* CHECKBOX =========================================== */
+/* Customize the label (the check-container) */
+chatroom .check-container, .sil-widget-chatroom .check-container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+chatroom .check-container input, .sil-widget-chatroom .check-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+chatroom .checkmark, .sil-widget-chatroom .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #464646;
+    border-radius: 4.3px;
+}
+
+/* On mouse-over, add a grey background color */
+chatroom .check-container:hover input ~ .checkmark, .sil-widget-chatroom .check-container:hover input ~ .checkmark {
+    background-color: #606060;
+}
+
+/* When the checkbox is checked, add a blue background */
+chatroom .check-container input:checked ~ .checkmark, .sil-widget-chatroom .check-container input:checked ~ .checkmark {
+    background-color: #464646;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+chatroom .checkmark:after, .sil-widget-chatroom .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Show the checkmark when checked */
+chatroom .check-container input:checked ~ .checkmark:after, .sil-widget-chatroom .check-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Style the checkmark/indicator */
+chatroom .check-container .checkmark:after, .sil-widget-chatroom .check-container .checkmark:after {
+    left: 10.3px;
+    top: 7px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-radius: 5px;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+chatroom .check-text, .sil-widget-chatroom .check-text {
+    font-size: 0.9rem;
+    font-weight: bold;
+    position: relative;
+    top: -0.4rem;
+}
+
+/* RADIO =========================================== */
+chatroom .radio-container [type="radio"]:checked, .sil-widget-chatroom .radio-container [type="radio"]:checked,
+chatroom .radio-container [type="radio"]:not(:checked), .sil-widget-chatroom .radio-container [type="radio"]:not(:checked) {
+    position: absolute;
+    left: -9999px;
+}
+chatroom .radio-container [type="radio"] + label, .sil-widget-chatroom .radio-container [type="radio"] + label {
+    font-size: 0.9rem;
+    font-weight: bold;
+    position: relative;
+    top: -0.4rem;
+    color: #464646;
+}
+chatroom .radio-container [type="radio"]:checked + label, .sil-widget-chatroom .radio-container [type="radio"]:checked + label,
+chatroom .radio-container [type="radio"]:not(:checked) + label, .sil-widget-chatroom .radio-container [type="radio"]:not(:checked) + label {
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
+    line-height: 20px;
+    display: inline-block;
+    color: #464646;
+}
+chatroom .radio-container [type="radio"]:checked + label:before, .sil-widget-chatroom .radio-container [type="radio"]:checked + label:before,
+chatroom .radio-container [type="radio"]:not(:checked) + label:before, .sil-widget-chatroom .radio-container [type="radio"]:not(:checked) + label:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    border: 1px solid #ddd;
+    border-radius: 100%;
+    background: #464646;
+}
+chatroom .radio-container [type="radio"]:checked + label:after, .sil-widget-chatroom .radio-container [type="radio"]:checked + label:after,
+chatroom .radio-container [type="radio"]:not(:checked) + label:after, .sil-widget-chatroom .radio-container [type="radio"]:not(:checked) + label:after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background: white;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    border-radius: 100%;
+    -webkit-transition: all 0.2s ease;
+    transition: all 0.2s ease;
+}
+chatroom .radio-container [type="radio"]:not(:checked) + label:after, .sil-widget-chatroom .radio-container [type="radio"]:not(:checked) + label:after {
+    opacity: 0;
+    -webkit-transform: scale(0);
+    transform: scale(0);
+}
+chatroom .radio-container [type="radio"]:checked + label:after, .sil-widget-chatroom .radio-container [type="radio"]:checked + label:after {
+    opacity: 1;
+    -webkit-transform: scale(1);
+    transform: scale(1);
+}
+
+/* Widgets =========================================== */
+chatroom .contact-container, .sil-widget-chatroom .contact-container {
+    background-color: white;
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 100vh;
+    padding-top: 5rem;
+}
+
+/* Components =========================================== */
+chatroom .bawkbox-contact, .sil-widget-chatroom .bawkbox-contact {
+    padding: 1rem;
+    height: auto;
+    padding-bottom: 1rem;
+    box-sizing: border-box;
+    align-self: center;
+    margin-bottom: 2rem;
+    display: inline-block;
+    float: left;
+    background-color: white;
+}
+chatroom .bawkbox-contact .bawkbox-contact-title, .sil-widget-chatroom .bawkbox-contact .bawkbox-contact-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: -0.1rem;
+    color: #464646;
+}
+
+chatroom .center, .sil-widget-chatroom .center {
+    justify-content: center;
+    align-items: center;
+}
+
+chatroom .ratings-form, .sil-widget-chatroom .ratings-form {
+    margin-bottom: 5.2rem;
+}
+
+chatroom .bawkbox-reviews, .sil-widget-chatroom .bawkbox-reviews {
+    width: 500px;
+    height: auto;
+    padding-bottom: 1rem;
+    box-sizing: border-box;
+    margin: 0 auto;
+    align-self: center;
+    margin-bottom: 3rem;
+}
+
+chatroom .bawkbox-reviews-title, .sil-widget-chatroom .bawkbox-reviews-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: -0.1rem;
+}
+
+chatroom .stars, .sil-widget-chatroom .stars {
+    display: flex;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+}
+
+chatroom .star-review, .sil-widget-chatroom .star-review {
+    flex: 1 1 auto;
+    justify-self: flex-start;
+    max-width: 28.2px;
+    height: 23px;
+    padding-left: 0.5rem;
+}
+
+chatroom .feedback-open, .sil-widget-chatroom .feedback-open {
+    right: 0;
+}
+
+chatroom .feedback-close, .sil-widget-chatroom .feedback-close {
+    right: -16rem;
+}
+
+chatroom .feedback-box, .sil-widget-chatroom .feedback-box {
+    position: relative;
+    -webkit-box-shadow: inset 4px 4px 5px -3px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: inset 4px 4px 5px -3px rgba(0, 0, 0, 0.15);
+    box-shadow: inset 4px 4px 5px -3px rgba(0, 0, 0, 0.15);
+    width: 81.7%;
+    height: 227px;
+    overflow: hidden;
+}
+chatroom .feedback-box .feedback, .sil-widget-chatroom .feedback-box .feedback {
+    position: absolute;
+    top: 0;
+    transition-property: right;
+    transition-duration: 1s;
+    border: 1px solid #343a402e;
+    border-left-color: #464646;
+    border-left-width: 3rem;
+    border-left-style: solid;
+    width: 300px;
+    height: 227px;
+    border-radius: 5px;
+    -webkit-box-shadow: -8px 8px 5px -4px rgba(0, 0, 0, 0.23);
+    -moz-box-shadow: -8px 8px 5px -4px rgba(0, 0, 0, 0.23);
+    box-shadow: -8px 8px 5px -4px rgba(0, 0, 0, 0.23);
+}
+chatroom .feedback-box .feedback .feedback-title, .sil-widget-chatroom .feedback-box .feedback .feedback-title {
+    position: absolute;
+    top: 0.5rem;
+    left: -2.7rem;
+    font-weight: 500;
+    writing-mode: vertical-rl;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 1.8px;
+    cursor: pointer;
+    height: 91%;
+    padding: 0.5rem;
+}
+chatroom .feedback-box .feedback .feedback-content, .sil-widget-chatroom .feedback-box .feedback .feedback-content {
+    width: 220px;
+    height: 167px;
+    position: absolute;
+    top: 8.1px;
+    left: 17px;
+    display: flex;
+    flex-wrap: wrap;
+}
+chatroom .feedback-box .feedback .feedback-content .rating-text, .sil-widget-chatroom .feedback-box .feedback .feedback-content .rating-text {
+    font-size: 0.9rem;
+    color: #464646;
+    text-align: center;
+    font-weight: bold;
+    align-self: center;
+}
+chatroom .feedback-box .feedback .feedback-icon, .sil-widget-chatroom .feedback-box .feedback .feedback-icon {
+    width: 22px;
+    height: 22px;
+    background-image: url("/widget-static/svg/components/mailbox.svg");
+    background-repeat: no-repeat;
+    position: absolute;
+    bottom: 0.6rem;
+    left: -2.1rem;
+}
+
+chatroom .feedback-disclaimer, .sil-widget-chatroom .feedback-disclaimer {
+    color: #acabac;
+    font-size: 0.65rem;
+    position: absolute;
+    bottom: -2.5rem;
+    left: 3.4rem;
+    width: 230px;
+}
+
+chatroom .feedback-disclaimer:hover, .sil-widget-chatroom .feedback-disclaimer:hover,
+chatroom .feedback-disclaimer :active, .sil-widget-chatroom .feedback-disclaimer :active {
+    text-decoration: none;
+}
+
+chatroom .bawk-rating-size, .sil-widget-chatroom .bawk-rating-size {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+chatroom .chatbox, .sil-widget-chatroom .chatbox {
+    background-color: white;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    width: 100%;
+    max-width: 411px;
+    height: auto;
+    border: solid 1px #4646465c;
+    box-sizing: border-box;
+    /* Shadow =========================================== */
+    -webkit-box-shadow: 7px 10px 8px 0px rgba(0, 0, 0, 0.09);
+    -moz-box-shadow: 7px 10px 8px 0px rgba(0, 0, 0, 0.09);
+    box-shadow: 7px 10px 8px 0px rgba(0, 0, 0, 0.09);
+}
+chatroom .chatbox .chatbox-header, .sil-widget-chatroom .chatbox .chatbox-header {
+    border-top-right-radius: inherit;
+    border-top-left-radius: inherit;
+    flex: 1 1 100%;
+    height: 3.6rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-left: 1.2rem;
+}
+chatroom .chatbox .chatbox-header .chatbox-header-settings, .sil-widget-chatroom .chatbox .chatbox-header .chatbox-header-settings {
+    width: 22px;
+    height: 22px;
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+}
+chatroom .chatbox .chatbox-header .chatbox-header-title, .sil-widget-chatroom .chatbox .chatbox-header .chatbox-header-title {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: normal;
+    margin-top: unset;
+    margin-bottom: unset;
+}
+chatroom .chatbox .chatbox-content, .sil-widget-chatroom .chatbox .chatbox-content {
+    overflow-y: scroll;
+    flex: 1 1 100%;
+    height: 460px;
+    padding: 1.3rem 0.8rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+chatroom .chatbox .chatbox-content .chatbox-admin-message, .sil-widget-chatroom .chatbox .chatbox-content .chatbox-admin-message {
+    color: #464646;
+    text-align: left;
+    padding-left: 5rem;
+    padding-bottom: 1.7rem;
+}
+chatroom .chatbox .chatbox-content .chatbox-customer-message, .sil-widget-chatroom .chatbox .chatbox-content .chatbox-customer-message {
+    color: #acacac;
+    text-align: left;
+    padding-bottom: 1.7rem;
+}
+chatroom .chatbox .chatbox-message-area, .sil-widget-chatroom .chatbox .chatbox-message-area {
+    display: flex;
+    flex-wrap: wrap;
+    height: auto;
+    width: 100%;
+    border-top: solid 1px #4646465c;
+    box-sizing: border-box;
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-textarea, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-textarea {
+    flex: 1 1 100%;
+    height: 118px;
+    background-color: white;
+    color: #464646;
+    font-size: 0.9rem;
+    width: 100%;
+    resize: none;
+    border: none;
+    padding: 1rem;
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-textarea::placeholder, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-textarea::placeholder {
+    color: #c6c6c6;
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer {
+    display: flex;
+    flex-wrap: wrap;
+    height: 2.6rem;
+    width: 100%;
+    background-color: #f1f1f1;
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #acabac;
+    font-size: 0.65rem;
+    flex: 1 1 50%;
+    /*MOBILE ONLY CODE*/
+    /*DESKTOP ONLY CODE*/
+}
+@media screen and (max-width: 700px) {
+    chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer .chat-powered-by-text, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer .chat-powered-by-text {
+        display: none;
+    }
+}
+@media screen and (min-width: 700px) {
+    chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer {
+        flex: 1 1 60%;
+    }
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer .bawkbox-powered-by-logo, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer .bawkbox-powered-by-logo {
+    position: relative;
+    top: -0.3rem;
+    /*MOBILE ONLY CODE*/
+}
+@media screen and (max-width: 700px) {
+    chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer .bawkbox-powered-by-logo, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-disclaimer .bawkbox-powered-by-logo {
+        left: -0.4rem;
+    }
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons {
+    flex: 1 1 50%;
+    /*DESKTOP ONLY CODE*/
+    justify-self: flex-end;
+    width: 170px;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+@media screen and (min-width: 700px) {
+    chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons {
+        flex: 1 1 40%;
+    }
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-message-footer-button, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-message-footer-button {
+    flex: 1 1 20%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-send, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-send {
+    flex: 1 1 46.6%;
+    background-color: #e45336;
+    color: white;
+    text-align: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-send:active, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-send:active {
+    background-color: #2d2d2d;
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-icon-clip, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-icon-clip {
+    width: 10.5px;
+    height: 21px;
+}
+chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-icon-emoticon, .sil-widget-chatroom .chatbox .chatbox-message-area .chatbox-message-footer .chatbox-message-footer-buttons .chatbox-icon-emoticon {
+    width: 20px;
+    height: 20px;
+}
+
+chatroom .chatbox-primary, .sil-widget-chatroom .chatbox-primary {
+    background-color: #e45336;
+}
+
+/* Pages =========================================== */
+chatroom body, .sil-widget-chatroom body {
+    font-family: "Inter", "system-ui", Ubuntu, sans-serif;
+}
+
+chatroom header, .sil-widget-chatroom header {
+    font-family: "Inter", "system-ui", Ubuntu, sans-serif;
+}
+chatroom header nav, .sil-widget-chatroom header nav {
+    background-color: #080d0d;
+}
+@media screen and (min-width: 1200px) {
+    chatroom header nav, .sil-widget-chatroom header nav {
+        padding-left: 150px !important;
+        padding-right: 150px !important;
+    }
+}
+
+chatroom h2, .sil-widget-chatroom h2 {
+    font-size: 2rem;
+    padding-bottom: 2rem;
+}
+
+chatroom .components-title, .sil-widget-chatroom .components-title {
+    padding-bottom: 1rem;
+}
+
+chatroom .doc-container, .sil-widget-chatroom .doc-container {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    /*DESKTOP ONLY CODE*/
+}
+@media screen and (min-width: 1200px) {
+    chatroom .doc-container, .sil-widget-chatroom .doc-container {
+        padding-left: 150px !important;
+        padding-right: 150px !important;
+    }
+}
+chatroom .doc-container .col-doc-left, .sil-widget-chatroom .doc-container .col-doc-left,
+chatroom .doc-container .col-doc-right, .sil-widget-chatroom .doc-container .col-doc-right {
+    padding: 1.5rem;
+}
+chatroom .doc-container .col-doc-left, .sil-widget-chatroom .doc-container .col-doc-left {
+    margin-top: 5.5rem;
+    box-sizing: border-box;
+    flex: 1 1 20%;
+}
+chatroom .doc-container .col-doc-right, .sil-widget-chatroom .doc-container .col-doc-right {
+    margin-top: 3rem;
+    padding-top: 4rem;
+    box-sizing: border-box;
+    flex: 1 1 80%;
+}
+chatroom .doc-container .components-list, .sil-widget-chatroom .doc-container .components-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    color: #333333;
+}
+chatroom .doc-container .components-list li, .sil-widget-chatroom .doc-container .components-list li {
+    padding-left: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+chatroom .doc-container .components-list li a, .sil-widget-chatroom .doc-container .components-list li a {
+    color: inherit;
+    text-decoration: none;
+}
+chatroom .doc-container .components-list li a:hover, .sil-widget-chatroom .doc-container .components-list li a:hover {
+    font-weight: bold;
+}
+
+chatroom .markup-box, .sil-widget-chatroom .markup-box {
+    max-height: 10rem;
+    /*MOBILE ONLY CODE*/
+}
+@media screen and (max-width: 700px) {
+    chatroom .markup-box, .sil-widget-chatroom .markup-box {
+        max-width: 86.6vw;
+    }
+}
+@media screen and (max-width: 500px) {
+    chatroom .markup-box, .sil-widget-chatroom .markup-box {
+        max-width: 86vw;
+    }
+}
+
+chatroom .markup-box-big, .sil-widget-chatroom .markup-box-big {
+    max-height: 27.9rem;
+}
+
+chatroom .markup-wrapper, .sil-widget-chatroom .markup-wrapper {
+    position: relative;
+    margin-top: -0.4rem;
+}
+
+chatroom .btn-copy-clipboard, .sil-widget-chatroom .btn-copy-clipboard {
+    cursor: pointer;
+    position: absolute;
+    top: 0.6rem;
+    border: none;
+    outline: none;
+    left: 0.5rem;
+    width: 73.2px;
+    height: auto;
+    padding: 0.2rem;
+    text-align: center;
+    color: #464646;
+    background-color: #b4b4b4;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-family: "Montserrat", sans-serif;
+}
+chatroom .btn-copy-clipboard:focus, .sil-widget-chatroom .btn-copy-clipboard:focus,
+chatroom .btn-copy-clipboard:active, .sil-widget-chatroom .btn-copy-clipboard:active {
+    outline: none;
+    box-shadow: none;
+}

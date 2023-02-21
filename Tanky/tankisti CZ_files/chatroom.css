@@ -1,0 +1,54 @@
+<style scoped>
+
+/*.chatbox-send {*/
+    /*border: 0;*/
+/*}*/
+
+/** {*/
+    /*box-sizing: border-box;*/
+/*}*/
+
+/*#feedback{*/
+  /*margin-bottom: 0;*/
+/*}*/
+/*#create {*/
+    /*margin: 20px 30px;*/
+    /*padding: auto;*/
+    /*text-align: center;*/
+/*}*/
+
+/*#messages_list {*/
+    /*max-height: 270px;*/
+    /*margin-bottom: 50px;*/
+    /*padding: 5px 0 5px 0;*/
+    /*overflow-y: scroll;*/
+/*}*/
+
+/*#content {*/
+    /*margin-top: 5px;*/
+    /*padding: 10px 5px 20px 5px;*/
+    /*overflow-y: auto;*/
+/*}*/
+
+/*#options{*/
+    /*position:absolute;*/
+    /*bottom: 15px;*/
+/*}*/
+
+/*.chatroom-navbar {*/
+    /*height: 10%;*/
+    /*padding: 4px 0 4px 12px;*/
+    /*width: auto;*/
+    /*color: #fff;*/
+    /*background-color: #F05139;*/
+    /*border-radius: 5px 5px 0 0;*/
+/*}*/
+
+/*.chatroom-modal {*/
+    /*width: 305px;*/
+    /*height: 430px;*/
+    /*border: 1px solid #bababa;*/
+    /*border-radius: 5px;*/
+    /*position: relative;*/
+/*}*/
+</style>

@@ -1,0 +1,1867 @@
+let __FILE__63ee893584aa460014379fbc; var Modal;(function(params) {if (typeof window.WS === "undefined") window.WS = {};WS[params.wid] = params;params.ws_proto = 'https://';params.location = params.ws_proto + params.host; var define = null;undefined
+
+__FILE__63e92255a3d157001edcf22b = "public/javascripts/utils.js";var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var bawkColors = {
+    bawkRed: "#E55039",
+    bawkBlue: "#7FD0C7"
+};
+
+function hasMin(array, attrib) {
+    if (array.length > 0) {
+        return array.reduce(function(prev, curr) {
+            return prev[attrib] < curr[attrib] ? prev : curr;
+        });
+    }
+}
+
+function get_columns(data) {
+    var columns = [];
+    for (var column in data[0]) {
+        if (
+            column !== "_id" &&
+            column !== "wid" &&
+            column !== "page" &&
+            column !== "is_reply" &&
+            column !== "owner" &&
+            column !== "uid" &&
+            column !== "body" &&
+            column !== "key"
+        ) {
+            columns.push(column);
+        }
+    }
+    return columns;
+}
+
+function beautify_date(date) {
+    var day = date.getDate();
+    var monthIndex = date.getMonth();
+    var year = date.getFullYear();
+
+    return day + "-" + monthNames[monthIndex];
+}
+
+function removeDuplicates(originalArray, prop) {
+    var newArray = [];
+    var lookupObject = {};
+    var propValueArray = [];
+
+    for (var i in originalArray) {
+        if (originalArray[i][prop] === undefined || originalArray[i][prop] === []) {
+            continue;
+        } else {
+            propValueArray = originalArray.filter(function(data) {
+                return data[prop] === originalArray[i][prop];
+            });
+
+            lookupObject[originalArray[i][prop]] = originalArray[i];
+            lookupObject[originalArray[i][prop]].first_activity = hasMin(propValueArray, "created_date").created_date;
+        }
+    }
+    for (i in lookupObject) {
+        newArray.push(lookupObject[i]);
+    }
+    return newArray;
+}
+
+function loop_interaction_strings(interaction_strings, cb) {
+    if (interaction_strings) {
+        for (i = 0; i < interaction_strings.length; i++) {
+            if (cb) cb(interaction_strings[i]);
+        }
+    }
+}
+
+/** used for joining two objects */
+var extend = function() {
+    var extended = {};
+
+    for (key in arguments) {
+        var argument = arguments[key];
+        for (prop in argument) {
+            if (Object.prototype.hasOwnProperty.call(argument, prop)) {
+                extended[prop] = argument[prop];
+            }
+        }
+    }
+    return extended;
+}
+// https://gist.github.com/mathewbyrne/1280286
+var slugify = function(text) {
+    return text
+        .toString()
+        .toLowerCase()
+        .replace(/\s+/g, "-") // Replace spaces with -
+        .replace(/[^\w\-]+/g, "") // Remove all non-word chars
+        .replace(/\-\-+/g, "-") // Replace multiple - with single -
+        .replace(/^-+/, "") // Trim - from start of text
+        .replace(/-+$/, ""); // Trim - from end of text
+};
+
+// specific modal caller for widgets on external sites
+var setModalContent = function(content, type) {
+    const { title, message, submitFunction, cancelText, submitText } = content;
+
+    $(`#modal-custom .modal-title h5`).text(title ? title : "Bawkbox Modal");
+    $(`#modal-custom #modal-cancel`).text(cancelText ? cancelText : "Cancel");
+    $(`#modal-custom #modal-submit`).text(submitText ? submitText : "OK");
+
+    // recallibrate elements 
+    $(`#modal-custom .modal-body`).show();
+    $(`#modal-custom .modal-body p`).show();
+    $(`#modal-custom #modal-cancel`).show();
+    $(`#modal-custom #modal-input`).hide();
+    $('#modal-custom #modal-submit').off('click');
+
+    if (message && type != "input") {
+        $(`#modal-custom .modal-body p`).text(message);
+    } else {
+        $(`#modal-custom .modal-body`).hide();
+        $(`#modal-custom .modal-body p`).hide();
+    }
+
+    // if modal type needs input
+    if (type == "input") {
+        $(`#modal-custom .modal-body`).show();
+        $(`#modal-custom #modal-input`).show();
+    }
+
+    // if modal type is not confirmation, hide the cancel button
+    if (type != "confirm") {
+        $(`#modal-custom #modal-cancel`).hide();
+    }
+
+    // if modal type needs no interaction, hide the footer/buttons
+    if (type === "alert") {
+        $(`#modal-custom .modal-footer`).hide();
+    } else {
+        $(`#modal-custom .modal-footer`).show();
+    }
+
+    $(`#modal-custom #modal-submit`).click(function(e) {
+        if(type === "input") {
+            var inputField = $(`#modal-custom #modal-input`);
+            var content = inputField.val();
+
+            inputField.val('');
+            submitFunction(content);
+            
+        } else if(submitFunction) {
+            submitFunction();
+        }
+        $(`#modal-custom  [rel='modal:close']`).click();
+    }); 
+
+    $(`#modal-custom #modal-cancel`).click(function(e) {
+        $(`#modal-custom  [rel='modal:close']`).click();
+    });
+
+    $("#modal-custom").modal();
+}
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/load-theme.js";/**
+ * only loads once, shared by all widgets
+ */
+
+if (!(WS[params.widget.slug] && WS[params.widget.slug].is_init)) {
+    /**
+     * Load a stylesheet or script.
+     */
+    WS.load_net = function(t, o) {
+        var e = document.getElementsByTagName("script");
+        e = e[e.length - 1];
+        var n = document.createElement(t);
+        if (t == "script") {
+            n.async = true;
+        }
+        for (k in o) {
+            n[k] = o[k];
+        }
+        e.parentNode.insertBefore(n, e);
+    };
+
+    /**
+        Used for unloading a theme before changing to a new one.
+    */
+    WS.unload_themes = function(old_theme) {
+        var e = document.getElementsByTagName("script");
+        e = e[e.length - 1];
+        var n = document.getElementsByTagName("link");
+
+        [].forEach.call(n, function(link) {
+            if (link.href.indexOf(old_theme) > -1) {
+                e.parentNode.removeChild(link);
+            }
+        });
+    };
+
+    /**
+        Used for loading a theme .css file into the page where
+        the widget is located
+    */
+    WS.load_theme = function(old_theme, new_theme, widget_slug) {
+        if (new_theme != "none") {
+            WS.load_net("link", {
+                href: params.location + "/widget-static/" + widget_slug + "/themes/" + new_theme + ".css",
+                rel: "stylesheet",
+                type: "text/css"
+            });
+        }
+    };
+    /**
+     * dynamic CSS rules.
+     */
+    var dynamic_style = document.createElement("style");
+
+    // Add a media (and/or media query) here if you'd like!
+    // style.setAttribute("media", "screen")
+    // style.setAttribute("media", "only screen and (max-width : 1024px)")
+
+    // WebKit hack :(
+    dynamic_style.appendChild(document.createTextNode(""));
+
+    // Add the <style> element to the page
+    document.head.appendChild(dynamic_style);
+
+    WS.add_css_rule = function(selector, rules, index) {
+        if ("insertRule" in dynamic_style.sheet) {
+            dynamic_style.sheet.insertRule(selector + "{" + rules + "}", index || 0);
+        } else if ("addRule" in dynamic_style.sheet) {
+            dynamic_style.sheet.addRule(selector, rules, index || 0);
+        }
+    };
+
+    /**
+     * Admin button styling.
+     * Button selectors include the paragraph parent in order to increase precedence.
+     */
+    WS.add_css_rule(
+        "button.btn-admin",
+        "padding: 1px 30px; background-color: #555; color: #eee; border-color: black; background-size: 20px 20px; background-repeat:no-repeat; background-position: 3px 7px"
+    );
+    WS.add_css_rule(
+        "button.btn-admin:hover, button.btn-admin:focus",
+        "background-color: #666; color: #fff; border-color: black;"
+    );
+    WS.add_css_rule(
+        "button.btn-admin",
+        "background-image: url(data:image/svg+xml,%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20xmlns%3Axlink%3D%22http%3A//www.w3.org/1999/xlink%22%20width%3D%22512%22%20height%3D%22512%22%20viewBox%3D%220%200%20512%20512%22%3E%0A%3Cpath%20d%3D%22M501.467%20408.938l-230.276-197.38c10.724-20.149%2016.809-43.141%2016.809-67.558%200-79.529-64.471-144-144-144-14.547%200-28.586%202.166-41.823%206.177l83.195%2083.195c12.445%2012.445%2012.445%2032.81%200%2045.255l-50.745%2050.745c-12.445%2012.445-32.81%2012.445-45.255%200l-83.195-83.195c-4.011%2013.237-6.177%2027.276-6.177%2041.823%200%2079.529%2064.471%20144%20144%20144%2024.417%200%2047.409-6.085%2067.558-16.81l197.38%20230.276c11.454%2013.362%2031.008%2014.113%2043.452%201.669l50.746-50.746c12.444-12.444%2011.693-31.997-1.669-43.451z%22%3E%3C/path%3E%0A%3C/svg%3E)"
+    );
+    WS.add_css_rule("p.btn-admin-wrap", "margin: 5px 0;");
+
+    WS.add_css_rule("p.bawk-credit", "margin: 0; opacity: 0.5");
+    
+    // Update colors
+    let colors = params.widget.colors;
+    if(colors) {
+        // Set this first to change whole text then allow other css rules to override this
+        WS.add_css_rule(params.widget.slug + " *", "color: " + colors.text + " !important;");
+
+        WS.add_css_rule(params.widget.slug + " .primary-color", "background-color: " + colors.primary + " !important; color:" + colors['primary-text'] + " !important");
+
+        WS.add_css_rule(params.widget.slug + " .secondary-color", "background-color: " + colors.secondary + " !important; color:" + colors['secondary-text'] + " !important");
+    }
+
+    WS[params.widget.slug] = {}
+    WS[params.widget.slug].is_init = true;
+}
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/shared.js";/**
+ * loads infront of each widget source payload, with local state and methods.
+ */
+
+params.widget_data_url = params.location + "/data/" + params.widget.slug;
+
+/**
+ * Load the management interface.
+ */
+let load_admin = function(wid) {
+    // if the Admin's loaded, unload it instead.
+    if (window.WS && window.WS.admin && params.wid === window.ws_admin_wid) {
+        console.log('UNMOUNTING');
+        window.WS.admin.unmount(true);
+    } else {
+        //embed a script.
+        WS.load_net("script", {
+            src: params.location + "/widget/admin/" + wid,
+            type: "application/javascript",
+        });
+        window.ws_admin_wid = params.wid;
+    }
+};
+
+var color = {
+    update_colors : function () {
+        let colors = params.widget.colors;
+        let widget_colors = params.Widget.colors
+        if (widget_colors && colors) {
+            widget_colors.forEach(function (color) {
+                if (color) WS.add_css_rule(params.widget.slug + " ." + color.selector + "-color", color.rule + ":" + colors[color.selector] + " !important;");
+            })
+        }
+    },
+    update_specific_colors : function (colors) {
+        let widget_colors = params.widget.colors;
+
+        if (widget_colors && widget_colors[colors.key]) {
+            WS.add_css_rule(colors.selector, colors.prop + ":" + (colors.value || "") + " " + widget_colors[colors.key] + " !important;");
+        }
+    }
+}
+
+color.update_colors();
+
+/**
+ * Shared ajax interface.
+ */
+let store = {
+    save: function(data, callback) {
+        nanoajax.ajax(
+            {
+                url: params.widget_data_url + "/save.json",
+                headers: {
+                    "ws-location": window.location + "",
+                    "ws-sid": params.sid,
+                },
+                body: data,
+            },
+            function(rsp_code, rsp) {
+                callback(JSON.parse(rsp || "[]").data, rsp_code);
+            }
+        );
+    },
+    delete: function(data, callback) {
+        var wid = data.wid;
+        var _id = data._id;
+        nanoajax.ajax(
+            {
+                url: params.widget_data_url + "/del/" + wid + "/" + _id,
+                headers: {
+                    "ws-location": window.location + "",
+                    "ws-sid": params.sid,
+                },
+                method: "GET",
+                body: data,
+            },
+            function(rsp_code, rsp) {
+                callback(JSON.parse(rsp || "[]").data, rsp_code);
+            }
+        );
+    },
+    load: function(opts, wid) {
+        let widget_id = wid ? wid : params.wid
+        var filter = {
+            wid: widget_id,
+        };
+        if (opts.key !== false) {
+            filter.key = window.location + "";
+        }
+        // add extra filters
+        if (opts.filter) {
+            filter = extend(filter, opts.filter);
+        }
+
+        let loadUrl =
+            params.widget_data_url +
+            ".json?filter=" +
+            encodeURIComponent(JSON.stringify(filter)) +
+            "&pagenum=" +
+            (opts.pagenum || 0);
+
+        if (params.demo_mode) {
+            loadUrl += "&demo=true";
+        }
+
+        nanoajax.ajax(
+            {
+                url: loadUrl,
+                headers: {
+                    "ws-location": window.location + "",
+                    "ws-sid": params.sid,
+                },
+            },
+            function(rsp_code, rsp) {
+                opts.callback(JSON.parse(rsp || "[]"), rsp_code);
+            }
+        );
+    },
+    load_all: function(opts, wid) {
+        let widget_id = wid ? wid : params.wid
+        var filter = {
+            wid: widget_id,
+        };
+        nanoajax.ajax(
+            {
+                url:
+                    params.widget_data_url +
+                    ".json?filter=" +
+                    encodeURIComponent(JSON.stringify(filter)) +
+                    "&pagenum=" +
+                    (opts.pagenum || 0),
+
+                headers: {
+                    "ws-location": window.location + "",
+                    "ws-sid": params.sid,
+                },
+            },
+            function(rsp_code, rsp) {
+                opts.callback(JSON.parse(rsp || "[]"), rsp_code);
+            }
+        );
+    },
+    email: function(data, callback) {
+        nanoajax.ajax(
+            {
+                url: params.location + "/" + params.widget.slug + "/email",
+                headers: {
+                    "ws-location": window.location + "",
+                    "ws-sid": params.sid,
+                },
+                body: data,
+            },
+            function(rsp_code, rsp) {
+                callback(JSON.parse(rsp || "[]").data, rsp_code);
+            }
+        );
+    },
+    save_settings: function(settings, callback) {
+        nanoajax.ajax(
+            {
+                url:
+                    params.location +
+                    "/widget/" +
+                    params.wid +
+                    "/settings?data=" +
+                    encodeURIComponent(JSON.stringify(settings)),
+            },
+            function(rsp_code, rsp) {
+                callback(JSON.parse(rsp || "[]").data, rsp_code);
+            }
+        );
+    },
+};
+
+var translate = function(the_string){
+    let translation = params.widget.l10n ? params.widget.l10n[the_string.toLowerCase()] : '';
+    if (translation && translation !== ''){
+        return translation;
+    } else {
+        return the_string;
+    }
+}
+
+let isUserAuthorized = function(user, widget, Widget, permission, data) {
+    const permissionSetting = (widget.permissions || {})[permission] || Widget.permissions[permission] || "none";
+
+    if (permissionSetting == "any") {
+        return true;
+    }
+    if (permissionSetting.indexOf("creator") > -1) {
+        if (data) {
+            if (!user || !data) {
+                return false;
+            } else if (user && data.uid && data.uid == user._id) {
+                return true;
+            } else {
+                return false;
+            }
+        } else return true;
+    }
+    if (permissionSetting.indexOf("admin") > -1) {
+        if (user && widget.user_id.toString() === user._id && true) {
+            return true;
+        }
+        return false;
+    }
+    if (permissionSetting == "none") {
+        return false;
+    }
+}
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/lib/riot.min.js";/* Riot v2.6.4, @license MIT */
+if (!window.riot){
+  !function(e,t){"use strict";function n(e,t,n){var r={};return r[e.key]=t,e.pos&&(r[e.pos]=n),r}function r(e,t){for(var n,r=t.length,o=e.length;r>o;)n=t[--r],t.splice(r,1),n.unmount()}function o(e,t){Object.keys(e.tags).forEach(function(n){var r=e.tags[n];R(r)?g(r,function(e){L(e,n,t)}):L(r,n,t)})}function i(e,t,n){var r,o=e._root;for(e._virts=[];o;)r=o.nextSibling,n?t.insertBefore(o,n._root):t.appendChild(o),e._virts.push(o),o=r}function a(e,t,n,r){for(var o,i=e._root,a=0;a<r;a++)o=i.nextSibling,t.insertBefore(i,n._root),i=o}function u(e,t,u){x(e,"each");var f,c=typeof _(e,"no-reorder")!==te||x(e,"no-reorder"),l=S(e),p=W[l]||{tmpl:m(e)},d=ue.test(l),g=e.parentNode,h=document.createTextNode(""),v=C(e),y="option"===l.toLowerCase(),b=[],w=[],N="VIRTUAL"==e.tagName;u=de.loopKeys(u),g.insertBefore(h,e),t.one("before-mount",function(){e.parentNode.removeChild(e),g.stub&&(g=t.root)}).on("update",function(){var m=de(u.val,t),x=document.createDocumentFragment();R(m)||(f=m||!1,m=f?Object.keys(m).map(function(e){return n(u,e,m[e])}):[]);for(var _=0,C=m.length;_<C;_++){var O=m[_],L=c&&typeof O==ne&&!f,T=w.indexOf(O),E=~T&&L?T:_,S=b[E];O=!f&&u.key?n(u,O,_):O,!L&&!S||L&&!~T||!S?(S=new s(p,{parent:t,isLoop:!0,hasImpl:!!W[l],root:d?g:e.cloneNode(),item:O},e.innerHTML),S.mount(),N&&(S._root=S.root.firstChild),_!=b.length&&b[_]?(N?i(S,g,b[_]):g.insertBefore(S.root,b[_].root),w.splice(_,0,O)):N?i(S,x):x.appendChild(S.root),b.splice(_,0,S),E=_):S.update(O,!0),E!==_&&L&&b[_]&&(N?a(S,g,b[_],e.childNodes.length):b[_].root.parentNode&&g.insertBefore(S.root,b[_].root),u.pos&&(S[u.pos]=_),b.splice(_,0,b.splice(E,1)[0]),w.splice(_,0,w.splice(E,1)[0]),!v&&S.tags&&o(S,_)),S._item=O,M(S,"_parent",t)}if(r(m,b),g.insertBefore(x,h),y&&le&&!g.multiple)for(var j=0;j<g.length;j++)if(g[j].__riot1374){g.selectedIndex=j,delete g[j].__riot1374;break}v&&(t.tags[l]=b),w=m.slice()})}function f(e,t,n,r){I(e,function(e){if(1==e.nodeType){if(e.isLoop=e.isLoop||e.parentNode&&e.parentNode.isLoop||_(e,"each")?1:0,n){var o=C(e);o&&!e.isLoop&&n.push(T(o,{root:e,parent:t},e.innerHTML,t))}e.isLoop&&!r||G(e,t,[])}})}function c(e,t,n){function r(e,t,r){de.hasExpr(t)&&n.push(j({dom:e,expr:t},r))}I(e,function(e){var n,o=e.nodeType;if(3==o&&"STYLE"!=e.parentNode.tagName&&r(e,e.nodeValue),1==o)return(n=_(e,"each"))?(u(e,t,n),!1):(g(e.attributes,function(t){var n=t.name,o=n.split("__")[1];if(r(e,t.value,{attr:o||n,bool:o}),o)return x(e,n),!1}),!C(e)&&void 0)})}function s(e,n,r){function o(){var e=_&&y?p:v||p;g(T.attributes,function(t){var n=t.value;m[w(t.name)]=de.hasExpr(n)?de(n,e):n}),g(Object.keys(I),function(t){m[w(t)]=de(I[t],e)})}function i(e){for(var t in C)typeof p[t]!==re&&k(p,t)&&(p[t]=e[t])}function a(e){g(Object.keys(e),function(t){var n=!fe.test(t)&&A(D,t);(typeof p[t]===re||n)&&(n||D.push(t),p[t]=e[t])})}function u(e){p.update(e,!0)}function s(e){if(g(L,function(t){t[e?"mount":"unmount"]()}),v){var t=e?"on":"off";y?v[t]("unmount",p.unmount):v[t]("update",u)[t]("unmount",p.unmount)}}var l,p=z.observable(this),m=K(n.opts)||{},v=n.parent,y=n.isLoop,_=n.hasImpl,C=$(n.item),O=[],L=[],T=n.root,S=T.tagName.toLowerCase(),I={},D=[];e.name&&T._tag&&T._tag.unmount(!0),this.isMounted=!1,T.isLoop=y,T._tag=this,M(this,"_riot_id",++Z),j(this,{parent:v,root:T,opts:m},C),M(this,"tags",{}),g(T.attributes,function(e){var t=e.value;de.hasExpr(t)&&(I[e.name]=t)}),l=ge(e.tmpl,r),M(this,"update",function(e,t){return e=$(e),y&&a(p.parent),e&&b(C)&&(i(e),C=e),j(p,e),o(),p.trigger("update",e),d(O,p),t&&p.parent?p.parent.one("updated",function(){p.trigger("updated")}):me(function(){p.trigger("updated")}),this}),M(this,"mixin",function(){return g(arguments,function(e){var t,n,r=[];e=typeof e===te?z.mixin(e):e,t=h(e)?new e:e;var o=Object.getPrototypeOf(t);do r=r.concat(Object.getOwnPropertyNames(n||t));while(n=Object.getPrototypeOf(n||t));g(r,function(e){if("init"!=e){var n=Object.getOwnPropertyDescriptor(t,e)||Object.getOwnPropertyDescriptor(o,e),r=n&&(n.get||n.set);!p.hasOwnProperty(e)&&r?Object.defineProperty(p,e,n):p[e]=h(t[e])?t[e].bind(p):t[e]}}),t.init&&t.init.bind(p)()}),this}),M(this,"mount",function(){o();var t=z.mixin(X);if(t)for(var n in t)t.hasOwnProperty(n)&&p.mixin(t[n]);if(p._parent&&p._parent.root.isLoop&&a(p._parent),e.fn&&e.fn.call(p,m),c(l,p,O),s(!0),e.attrs&&P(e.attrs,function(e,t){N(T,e,t)}),(e.attrs||_)&&c(p.root,p,O),p.parent&&!y||p.update(C),p.trigger("before-mount"),y&&!_)T=l.firstChild;else{for(;l.firstChild;)T.appendChild(l.firstChild);T.stub&&(T=v.root)}M(p,"root",T),y&&f(p.root,p.parent,null,!0),!p.parent||p.parent.isMounted?(p.isMounted=!0,p.trigger("mount")):p.parent.one("mount",function(){H(p.root)||(p.parent.isMounted=p.isMounted=!0,p.trigger("mount"))})}),M(this,"unmount",function(e){var n,r=T,o=r.parentNode,i=Q.indexOf(p);if(p.trigger("before-unmount"),~i&&Q.splice(i,1),o){if(v)n=E(v),R(n.tags[S])?g(n.tags[S],function(e,t){e._riot_id==p._riot_id&&n.tags[S].splice(t,1)}):n.tags[S]=t;else for(;r.firstChild;)r.removeChild(r.firstChild);e?(x(o,ee),x(o,J)):o.removeChild(r)}this._virts&&g(this._virts,function(e){e.parentNode&&e.parentNode.removeChild(e)}),p.trigger("unmount"),s(),p.off("*"),p.isMounted=!1,delete T._tag}),f(l,this,L)}function l(t,n,r,o){r[t]=function(t){var i,a=o._parent,u=o._item;if(!u)for(;a&&!u;)u=a._item,a=a._parent;t=t||e.event,k(t,"currentTarget")&&(t.currentTarget=r),k(t,"target")&&(t.target=t.srcElement),k(t,"which")&&(t.which=t.charCode||t.keyCode),t.item=u,n.call(o,t)===!0||/radio|check/.test(r.type)||(t.preventDefault&&t.preventDefault(),t.returnValue=!1),t.preventUpdate||(i=u?E(a):o,i.update())}}function p(e,t,n){e&&(e.insertBefore(n,t),e.removeChild(t))}function d(e,t){g(e,function(e,n){var r=e.dom,o=e.attr,i=de(e.expr,t),a=e.parent||e.dom.parentNode;if(e.bool?i=!!i:null==i&&(i=""),e.value!==i){if(e.value=i,!o)return i+="",void(a&&(e.parent=a,"TEXTAREA"===a.tagName?(a.value=i,se||(r.nodeValue=i)):r.nodeValue=i));if("value"===o)return void(r.value!==i&&(r.value=i,N(r,o,i)));if(x(r,o),h(i))l(o,i,r,t);else if("if"==o){var u=e.stub,f=function(){p(u.parentNode,u,r)},c=function(){p(r.parentNode,r,u)};i?u&&(f(),r.inStub=!1,H(r)||I(r,function(e){e._tag&&!e._tag.isMounted&&(e._tag.isMounted=!!e._tag.trigger("mount"))})):(u=e.stub=u||document.createTextNode(""),r.parentNode?c():(t.parent||t).one("updated",c),r.inStub=!0)}else"show"===o?r.style.display=i?"":"none":"hide"===o?r.style.display=i?"none":"":e.bool?(r[o]=i,i&&N(r,o,o),le&&"selected"===o&&"OPTION"===r.tagName&&(r.__riot1374=i)):(0===i||i&&typeof i!==ne)&&(U(o,Y)&&o!=J&&(o=o.slice(Y.length)),N(r,o,i))}})}function g(e,t){for(var n,r=e?e.length:0,o=0;o<r;o++)n=e[o],null!=n&&t(n,o)===!1&&o--;return e}function h(e){return typeof e===oe||!1}function m(e){if(e.outerHTML)return e.outerHTML;var t=D("div");return t.appendChild(e.cloneNode(!0)),t.innerHTML}function v(e,t){if(typeof e.innerHTML!=re)e.innerHTML=t;else{var n=(new DOMParser).parseFromString(t,"application/xml");e.appendChild(e.ownerDocument.importNode(n.documentElement,!0))}}function y(e){return~ce.indexOf(e)}function b(e){return e&&typeof e===ne}function x(e,t){e.removeAttribute(t)}function w(e){return e.replace(/-(\w)/g,function(e,t){return t.toUpperCase()})}function _(e,t){return e.getAttribute(t)}function N(e,t,n){var r=ae.exec(t);r&&r[1]?e.setAttributeNS(ie,r[1],n):e.setAttribute(t,n)}function C(e){return e.tagName&&W[_(e,ee)||_(e,J)||e.tagName.toLowerCase()]}function O(e,t,n){var r=n.tags[t];r?(R(r)||r!==e&&(n.tags[t]=[r]),A(n.tags[t],e)||n.tags[t].push(e)):n.tags[t]=e}function L(e,t,n){var r,o=e.parent;o&&(r=o.tags[t],R(r)?r.splice(n,0,r.splice(r.indexOf(e),1)[0]):O(e,t,o))}function T(e,t,n,r){var o=new s(e,t,n),i=S(t.root),a=E(r);return o.parent=a,o._parent=r,O(o,i,a),a!==r&&O(o,i,r),t.root.innerHTML="",o}function E(e){for(var t=e;!C(t.root)&&t.parent;)t=t.parent;return t}function M(e,t,n,r){return Object.defineProperty(e,t,j({value:n,enumerable:!1,writable:!1,configurable:!0},r)),e}function S(e){var t=C(e),n=_(e,"name"),r=n&&!de.hasExpr(n)?n:t?t.name:e.tagName.toLowerCase();return r}function j(e){for(var t,n=arguments,r=1;r<n.length;++r)if(t=n[r])for(var o in t)k(e,o)&&(e[o]=t[o]);return e}function A(e,t){return~e.indexOf(t)}function R(e){return Array.isArray(e)||e instanceof Array}function k(e,t){var n=Object.getOwnPropertyDescriptor(e,t);return typeof e[t]===re||n&&n.writable}function $(e){if(!(e instanceof s||e&&typeof e.trigger==oe))return e;var t={};for(var n in e)fe.test(n)||(t[n]=e[n]);return t}function I(e,t){if(e){if(t(e)===!1)return;for(e=e.firstChild;e;)I(e,t),e=e.nextSibling}}function P(e,t){for(var n,r=/([-\w]+) ?= ?(?:"([^"]*)|'([^']*)|({[^}]*}))/g;n=r.exec(e);)t(n[1].toLowerCase(),n[2]||n[3]||n[4])}function H(e){for(;e;){if(e.inStub)return!0;e=e.parentNode}return!1}function D(e,t){return t?document.createElementNS("http://www.w3.org/2000/svg","svg"):document.createElement(e)}function F(e,t){return(t||document).querySelectorAll(e)}function B(e,t){return(t||document).querySelector(e)}function K(e){return Object.create(e||null)}function q(e){return _(e,"id")||_(e,"name")}function G(e,t,n){var r,o=q(e),i=function(i){A(n,o)||(r=R(i),i?(!r||r&&!A(i,e))&&(r?i.push(e):t[o]=[i,e]):t[o]=e)};o&&(de.hasExpr(o)?t.one("mount",function(){o=q(e),i(t[o])}):i(t[o]))}function U(e,t){return e.slice(0,t.length)===t}function V(e,t,n){var r=W[t],o=e._innerHTML=e._innerHTML||e.innerHTML;return e.innerHTML="",r&&e&&(r=new s(r,{root:e,opts:n},o)),r&&r.mount&&(r.mount(),A(Q,r)||Q.push(r)),r}var z={version:"v2.6.4",settings:{}},Z=0,Q=[],W={},X="__global_mixin",Y="riot-",J=Y+"tag",ee="data-is",te="string",ne="object",re="undefined",oe="function",ie="http://www.w3.org/1999/xlink",ae=/^xlink:(\w+)/,ue=/^(?:t(?:body|head|foot|[rhd])|caption|col(?:group)?|opt(?:ion|group))$/,fe=/^(?:_(?:item|id|parent)|update|root|(?:un)?mount|mixin|is(?:Mounted|Loop)|tags|parent|opts|trigger|o(?:n|ff|ne))$/,ce=["altGlyph","animate","animateColor","circle","clipPath","defs","ellipse","feBlend","feColorMatrix","feComponentTransfer","feComposite","feConvolveMatrix","feDiffuseLighting","feDisplacementMap","feFlood","feGaussianBlur","feImage","feMerge","feMorphology","feOffset","feSpecularLighting","feTile","feTurbulence","filter","font","foreignObject","g","glyph","glyphRef","image","line","linearGradient","marker","mask","missing-glyph","path","pattern","polygon","polyline","radialGradient","rect","stop","svg","switch","symbol","text","textPath","tref","tspan","use"],se=0|(e&&e.document||{}).documentMode,le=e&&!!e.InstallTrigger;z.observable=function(e){function t(e,t){for(var n=e.split(" "),r=n.length,o=0;o<r;o++){var i=n[o];i&&t(i,o)}}e=e||{};var n={},r=Array.prototype.slice;return Object.defineProperties(e,{on:{value:function(r,o){return"function"!=typeof o?e:(t(r,function(e,t){(n[e]=n[e]||[]).push(o),o.typed=t>0}),e)},enumerable:!1,writable:!1,configurable:!1},off:{value:function(r,o){return"*"!=r||o?t(r,function(e,t){if(o)for(var r,i=n[e],a=0;r=i&&i[a];++a)r==o&&i.splice(a--,1);else delete n[e]}):n={},e},enumerable:!1,writable:!1,configurable:!1},one:{value:function(t,n){function r(){e.off(t,r),n.apply(e,arguments)}return e.on(t,r)},enumerable:!1,writable:!1,configurable:!1},trigger:{value:function(o){for(var i,a=arguments.length-1,u=new Array(a),f=0;f<a;f++)u[f]=arguments[f+1];return t(o,function(t,o){i=r.call(n[t]||[],0);for(var a,f=0;a=i[f];++f)a.busy||(a.busy=1,a.apply(e,a.typed?[t].concat(u):u),i[f]!==a&&f--,a.busy=0);n["*"]&&"*"!=t&&e.trigger.apply(e,["*",t].concat(u))}),e},enumerable:!1,writable:!1,configurable:!1}}),e},function(t){function n(e){return e.split(/[\/?#]/)}function r(e,t){var n=new RegExp("^"+t[C](/\*/g,"([^/?#]+?)")[C](/\.\./,".*")+"$"),r=e.match(n);if(r)return r.slice(1)}function o(e,t){var n;return function(){clearTimeout(n),n=setTimeout(e,t)}}function i(e){g=o(l,1),M[_](O,g),M[_](L,g),S[_](k,p),e&&l(!0)}function a(){this.$=[],t.observable(this),I.on("stop",this.s.bind(this)),I.on("emit",this.e.bind(this))}function u(e){return e[C](/^\/|\/$/,"")}function f(e){return"string"==typeof e}function c(e){return(e||A.href)[C](b,"")}function s(e){return"#"==h[0]?(e||A.href||"").split(h)[1]||"":(A?c(e):e||"")[C](h,"")}function l(e){var t,n=0==D;if(!(E<=D)&&(D++,H.push(function(){var t=s();(e||t!=m)&&(I[T]("emit",t),m=t)}),n)){for(;t=H.shift();)t();D=0}}function p(e){if(!(1!=e.which||e.metaKey||e.ctrlKey||e.shiftKey||e.defaultPrevented)){for(var t=e.target;t&&"A"!=t.nodeName;)t=t.parentNode;!t||"A"!=t.nodeName||t[N]("download")||!t[N]("href")||t.target&&"_self"!=t.target||t.href.indexOf(A.href.match(b)[0])==-1||t.href!=A.href&&(t.href.split("#")[0]==A.href.split("#")[0]||"#"!=h[0]&&0!==c(t.href).indexOf(h)||"#"==h[0]&&t.href.split(h)[0]!=A.href.split(h)[0]||!d(s(t.href),t.title||S.title))||e.preventDefault()}}function d(e,t,n){return j?(e=h+u(e),t=t||S.title,n?j.replaceState(null,t,e):j.pushState(null,t,e),S.title=t,P=!1,l(),P):I[T]("emit",s(e))}var g,h,m,v,y,b=/^.+?\/\/+[^\/]+/,x="EventListener",w="remove"+x,_="add"+x,N="hasAttribute",C="replace",O="popstate",L="hashchange",T="trigger",E=3,M="undefined"!=typeof e&&e,S="undefined"!=typeof document&&document,j=M&&history,A=M&&(j.location||M.location),R=a.prototype,k=S&&S.ontouchstart?"touchstart":"click",$=!1,I=t.observable(),P=!1,H=[],D=0;R.m=function(e,t,n){!f(e)||t&&!f(t)?t?this.r(e,t):this.r("@",e):d(e,t,n||!1)},R.s=function(){this.off("*"),this.$=[]},R.e=function(e){this.$.concat("@").some(function(t){var n=("@"==t?v:y)(u(e),u(t));if("undefined"!=typeof n)return this[T].apply(null,[t].concat(n)),P=!0},this)},R.r=function(e,t){"@"!=e&&(e="/"+u(e),this.$.push(e)),this.on(e,t)};var F=new a,B=F.m.bind(F);B.create=function(){var e=new a,t=e.m.bind(e);return t.stop=e.s.bind(e),t},B.base=function(e){h=e||"#",m=s()},B.exec=function(){l(!0)},B.parser=function(e,t){e||t||(v=n,y=r),e&&(v=e),t&&(y=t)},B.query=function(){var e={},t=A.href||m;return t[C](/[?&](.+?)=([^&]*)/g,function(t,n,r){e[n]=r}),e},B.stop=function(){$&&(M&&(M[w](O,g),M[w](L,g),S[w](k,p)),I[T]("stop"),$=!1)},B.start=function(e){$||(M&&("complete"==document.readyState?i(e):M[_]("load",function(){setTimeout(function(){i(e)},1)})),$=!0)},B.base(),B.parser(),t.route=B}(z);var pe=function(e){function t(e){return e}function n(e,t){return t||(t=b),new RegExp(e.source.replace(/{/g,t[2]).replace(/}/g,t[3]),e.global?c:"")}function r(e){if(e===m)return v;var t=e.split(" ");if(2!==t.length||d.test(e))throw new Error('Unsupported brackets "'+e+'"');return t=t.concat(e.replace(g,"\\").split(" ")),t[4]=n(t[1].length>1?/{[\S\s]*?}/:v[4],t),t[5]=n(e.length>3?/\\({|})/g:v[5],t),t[6]=n(v[6],t),t[7]=RegExp("\\\\("+t[3]+")|([[({])|("+t[3]+")|"+p,c),t[8]=e,t}function o(e){return e instanceof RegExp?u(e):b[e]}function i(e){(e||(e=m))!==b[8]&&(b=r(e),u=e===m?t:n,b[9]=u(v[9])),y=e}function a(e){var t;e=e||{},t=e.brackets,Object.defineProperty(e,"brackets",{set:i,get:function(){return y},enumerable:!0}),f=e,i(t)}var u,f,c="g",s=/\/\*[^*]*\*+(?:[^*\/][^*]*\*+)*\//g,l=/"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'/g,p=l.source+"|"+/(?:\breturn\s+|(?:[$\w\)\]]|\+\+|--)\s*(\/)(?![*\/]))/.source+"|"+/\/(?=[^*\/])[^[\/\\]*(?:(?:\[(?:\\.|[^\]\\]*)*\]|\\.)[^[\/\\]*)*?(\/)[gim]*/.source,d=RegExp("[\\x00-\\x1F<>a-zA-Z0-9'\",;\\\\]"),g=/(?=[[\]()*+?.^$|])/g,h={"(":RegExp("([()])|"+p,c),"[":RegExp("([[\\]])|"+p,c),"{":RegExp("([{}])|"+p,c)},m="{ }",v=["{","}","{","}",/{[^}]*}/,/\\([{}])/g,/\\({)|{/g,RegExp("\\\\(})|([[({])|(})|"+p,c),m,/^\s*{\^?\s*([$\w]+)(?:\s*,\s*(\S+))?\s+in\s+(\S.*)\s*}/,/(^|[^\\]){=[\S\s]*?}/],y=e,b=[];return o.split=function(e,t,n){function r(e){t||a?c.push(e&&e.replace(n[5],"$1")):c.push(e)}function o(e,t,n){var r,o=h[t];for(o.lastIndex=n,n=1;(r=o.exec(e))&&(!r[1]||(r[1]===t?++n:--n)););return n?e.length:o.lastIndex}n||(n=b);var i,a,u,f,c=[],s=n[6];for(a=u=s.lastIndex=0;i=s.exec(e);){if(f=i.index,a){if(i[2]){s.lastIndex=o(e,i[2],s.lastIndex);continue}if(!i[3])continue}i[1]||(r(e.slice(u,f)),u=s.lastIndex,s=n[6+(a^=1)],s.lastIndex=u)}return e&&u<e.length&&r(e.slice(u)),c},o.hasExpr=function(e){return b[4].test(e)},o.loopKeys=function(e){var t=e.match(b[9]);return t?{key:t[1],pos:t[2],val:b[0]+t[3].trim()+b[1]}:{val:e.trim()}},o.array=function(e){return e?r(e):b},Object.defineProperty(o,"settings",{set:a,get:function(){return f}}),o.settings="undefined"!=typeof z&&z.settings||{},o.set=i,o.R_STRINGS=l,o.R_MLCOMMS=s,o.S_QBLOCKS=p,o}(),de=function(){function t(e,t){return e?(u[e]||(u[e]=r(e))).call(t,n):e}function n(e,n){t.errorHandler&&(e.riotData={tagName:n&&n.root&&n.root.tagName,_riot_id:n&&n._riot_id},t.errorHandler(e))}function r(e){var t=o(e);return"try{return "!==t.slice(0,11)&&(t="return "+t),new Function("E",t+";")}function o(e){var t,n=[],r=pe.split(e.replace(l,'"'),1);if(r.length>2||r[0]){var o,a,u=[];for(o=a=0;o<r.length;++o)t=r[o],t&&(t=1&o?i(t,1,n):'"'+t.replace(/\\/g,"\\\\").replace(/\r\n?|\n/g,"\\n").replace(/"/g,'\\"')+'"')&&(u[a++]=t);t=a<2?u[0]:"["+u.join(",")+'].join("")'}else t=i(r[1],0,n);return n[0]&&(t=t.replace(p,function(e,t){return n[t].replace(/\r/g,"\\r").replace(/\n/g,"\\n")})),t}function i(e,t,n){function r(t,n){var r,o=1,i=d[t];for(i.lastIndex=n.lastIndex;r=i.exec(e);)if(r[0]===t)++o;else if(!--o)break;n.lastIndex=o?e.length:i.lastIndex}if(e=e.replace(s,function(e,t){return e.length>2&&!t?f+(n.push(e)-1)+"~":e}).replace(/\s+/g," ").trim().replace(/\ ?([[\({},?\.:])\ ?/g,"$1")){for(var o,i=[],u=0;e&&(o=e.match(c))&&!o.index;){var l,p,g=/,|([[{(])|$/g;for(e=RegExp.rightContext,l=o[2]?n[o[2]].slice(1,-1).trim().replace(/\s+/g," "):o[1];p=(o=g.exec(e))[1];)r(p,g);p=e.slice(0,o.index),e=RegExp.rightContext,i[u++]=a(p,1,l)}e=u?u>1?"["+i.join(",")+'].join(" ").trim()':i[0]:a(e,t)}return e}function a(e,t,n){var r;return e=e.replace(h,function(e,t,n,o,i){return n&&(o=r?0:o+e.length,"this"!==n&&"global"!==n&&"window"!==n?(e=t+'("'+n+g+n,o&&(r="."===(i=i[o])||"("===i||"["===i)):o&&(r=!m.test(i.slice(o)))),e}),r&&(e="try{return "+e+"}catch(e){E(e,this)}"),n?e=(r?"function(){"+e+"}.call(this)":"("+e+")")+'?"'+n+'":""':t&&(e="function(v){"+(r?e.replace("return ","v="):"v=("+e+")")+';return v||v===0?v:""}.call(this)'),e}var u={};t.haveRaw=pe.hasRaw,t.hasExpr=pe.hasExpr,t.loopKeys=pe.loopKeys,t.clearCache=function(){u={}},t.errorHandler=null;var f=String.fromCharCode(8279),c=/^(?:(-?[_A-Za-z\xA0-\xFF][-\w\xA0-\xFF]*)|\u2057(\d+)~):/,s=RegExp(pe.S_QBLOCKS,"g"),l=/\u2057/g,p=/\u2057(\d+)~/g,d={"(":/[()]/g,"[":/[[\]]/g,"{":/[{}]/g},g='"in this?this:'+("object"!=typeof e?"global":"window")+").",h=/[,{][\$\w]+(?=:)|(^ *|[^$\w\.{])(?!(?:typeof|true|false|null|undefined|in|instanceof|is(?:Finite|NaN)|void|NaN|new|Date|RegExp|Math)(?![$\w]))([$_A-Za-z][$\w]*)/g,m=/^(?=(\.[$\w]+))\1(?:[^.[(]|$)/;return t.version=pe.version="v2.4.2",t}(),ge=function e(){function e(e,r){var o=e&&e.match(/^\s*<([-\w]+)/),i=o&&o[1].toLowerCase(),a=D("div",y(i));return e=n(e,r),f.test(i)?a=t(a,e,i):v(a,e),a.stub=!0,a}function t(e,t,n){var r="o"===n[0],o=r?"select>":"table>";if(e.innerHTML="<"+o+t.trim()+"</"+o,o=e.firstChild,r)o.selectedIndex=-1;else{var i=u[n];i&&1===o.childElementCount&&(o=B(i,o))}return o}function n(e,t){if(!r.test(e))return e;var n={};return t=t&&t.replace(i,function(e,t,r){return n[t]=n[t]||r,""}).trim(),e.replace(a,function(e,t,r){return n[t]||r||""}).replace(o,function(e,n){return t||n||""})}var r=/<yield\b/i,o=/<yield\s*(?:\/>|>([\S\s]*?)<\/yield\s*>|>)/gi,i=/<yield\s+to=['"]([^'">]*)['"]\s*>([\S\s]*?)<\/yield\s*>/gi,a=/<yield\s+from=['"]?([-\w]+)['"]?\s*(?:\/>|>([\S\s]*?)<\/yield\s*>)/gi,u={tr:"tbody",th:"tr",td:"tr",col:"colgroup"},f=se&&se<10?ue:/^(?:t(?:body|head|foot|[rhd])|caption|col(?:group)?)$/;return e}(),he=function(t){if(!e)return{add:function(){},inject:function(){}};var n=function(){var e=D("style");N(e,"type","text/css");var t=B("style[type=riot]");return t?(t.id&&(e.id=t.id),t.parentNode.replaceChild(e,t)):document.getElementsByTagName("head")[0].appendChild(e),e}(),r=n.styleSheet,o="";return Object.defineProperty(t,"styleNode",{value:n,writable:!0}),{add:function(e){o+=e},inject:function(){o&&(r?r.cssText+=o:n.innerHTML+=o,o="")}}}(z),me=function(e){var t=e.requestAnimationFrame||e.mozRequestAnimationFrame||e.webkitRequestAnimationFrame;if(!t||/iP(ad|hone|od).*OS 6/.test(e.navigator.userAgent)){var n=0;t=function(e){var t=Date.now(),r=Math.max(16-(t-n),0);setTimeout(function(){e(n=t+r)},r)}}return t}(e||{});z.util={brackets:pe,tmpl:de},z.mixin=function(){var e={},t=e[X]={},n=0;return function(r,o,i){if(b(r))return void z.mixin("__unnamed_"+n++,r,!0);var a=i?t:e;if(!o){if(typeof a[r]===re)throw new Error("Unregistered mixin: "+r);return a[r]}h(o)?(j(o.prototype,a[r]||{}),a[r]=o):a[r]=j(a[r]||{},o)}}(),z.tag=function(e,t,n,r,o){return h(r)&&(o=r,/^[\w\-]+\s?=/.test(n)?(r=n,n=""):r=""),n&&(h(n)?o=n:he.add(n)),e=e.toLowerCase(),W[e]={name:e,tmpl:t,attrs:r,fn:o},e},z.tag2=function(e,t,n,r,o){return n&&he.add(n),W[e]={name:e,tmpl:t,attrs:r,fn:o},e},z.mount=function(e,t,n){function r(e){var t="";return g(e,function(e){/[^-\w]/.test(e)||(e=e.trim().toLowerCase(),t+=",["+ee+'="'+e+'"],['+J+'="'+e+'"]')}),t}function o(){var e=Object.keys(W);return e+r(e)}function i(e){if(e.tagName){var r=_(e,ee)||_(e,J);t&&r!==t&&(r=t,N(e,ee,t),N(e,J,t));var o=V(e,r||e.tagName.toLowerCase(),n);o&&f.push(o)}else e.length&&g(e,i)}var a,u,f=[];if(he.inject(),b(t)&&(n=t,t=0),typeof e===te?("*"===e?e=u=o():e+=r(e.split(/, */)),a=e?F(e):[]):a=e,"*"===t){if(t=u||o(),a.tagName)a=F(t,a);else{var c=[];g(a,function(e){c.push(F(t,e))}),a=c}t=0}return i(a),f},z.update=function(){return g(Q,function(e){e.update()})},z.vdom=Q,z.Tag=s,typeof exports===ne?module.exports=z:typeof define===oe&&typeof define.amd!==re?define(function(){return z}):e.riot=z}("undefined"!=typeof window?window:void 0);
+}
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/lib/nanoajax.js";// Best place to find information on XHR features is:
+// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
+
+var reqfields = ["responseType", "withCredentials", "timeout", "onprogress"];
+
+// Simple and small ajax function
+// Takes a parameters object and a callback function
+// Parameters:
+//  - url: string, required
+//  - headers: object of `{header_name: header_value, ...}`
+//  - body:
+//      + string (sets content type to 'application/x-www-form-urlencoded' if not set in headers)
+//      + FormData (doesn't set content type so that browser will set as appropriate)
+//  - method: 'GET', 'POST', etc. Defaults to 'GET' or 'POST' based on body
+//  - cors: If your using cross-origin, you will need this true for IE8-9
+//
+// The following parameters are passed onto the xhr object.
+// IMPORTANT NOTE: The caller is responsible for compatibility checking.
+//  - responseType: string, various compatability, see xhr docs for enum options
+//  - withCredentials: boolean, IE10+, CORS only
+//  - timeout: long, ms timeout, IE8+
+//  - onprogress: callback, IE10+
+//
+// Callback function prototype:
+//  - statusCode from request
+//    + Possibly null or 0 (i.e. falsy) if an error occurs
+//  - response
+//    + if responseType set and supported by browser, this is an object of some type (see docs)
+//    + otherwise if request completed, this is the string text of the response
+//    + if request is aborted, this is "Abort"
+//    + if request times out, this is "Timeout"
+//    + if request errors before completing (probably a CORS issue), this is "Error"
+//  - request object
+//
+// Returns the request object. So you can call .abort() or other methods
+//
+// DEPRECATIONS:
+//  - Passing a string instead of the params object has been removed!
+//
+var nanoajax = {};
+
+nanoajax.ajax = function(params, callback) {
+    // Any variable used more than once is var'd here because
+    // minification will munge the variables whereas it can't munge
+    // the object access.
+    var headers = params.headers || {},
+        body = params.body,
+        method = params.method || (body ? "POST" : "GET"),
+        called = false;
+
+    var req = getRequest(params.cors);
+
+    function cb(statusCode, responseText) {
+        return function() {
+            if (!called) {
+                callback(
+                    req.status === undefined ? statusCode : req.status,
+                    req.status === 0 ? "Error" : req.response || req.responseText || responseText,
+                    req
+                );
+                called = true;
+            }
+        };
+    }
+
+    req.open(method, params.url, true);
+
+    var success = (req.onload = cb(200));
+    req.onreadystatechange = function() {
+        if (req.readyState === 4) success();
+    };
+    req.onerror = cb(null, "Error");
+    req.ontimeout = cb(null, "Timeout");
+    req.onabort = cb(null, "Abort");
+
+    if (body) {
+        setDefault(headers, "X-Requested-With", "XMLHttpRequest");
+
+        if (!(body instanceof String) && (!window.FormData || !(body instanceof window.FormData))) {
+            // assume a pojo means to send a JSON post.
+            setDefault(headers, "Content-Type", "application/json;charset=UTF-8");
+            body = JSON.stringify(body);
+        } else if (!window.FormData || !(body instanceof window.FormData)) {
+            setDefault(headers, "Content-Type", "application/x-www-form-urlencoded");
+        }
+    }
+
+    for (var i = 0, len = reqfields.length, field; i < len; i++) {
+        field = reqfields[i];
+        if (params[field] !== undefined) req[field] = params[field];
+    }
+
+    for (var field in headers) req.setRequestHeader(field, headers[field]);
+
+    req.send(body);
+
+    return req;
+};
+
+function getRequest(cors) {
+    // XDomainRequest is only way to do CORS in IE 8 and 9
+    // But XDomainRequest isn't standards-compatible
+    // Notably, it doesn't allow cookies to be sent or set by servers
+    // IE 10+ is standards-compatible in its XMLHttpRequest
+    // but IE 10 can still have an XDomainRequest object, so we don't want to use it
+    if (cors && window.XDomainRequest && !/MSIE 1/.test(navigator.userAgent)) return new XDomainRequest();
+    if (window.XMLHttpRequest) return new XMLHttpRequest();
+}
+
+function setDefault(obj, key, value) {
+    obj[key] = obj[key] || value;
+}
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/lib/ondomready.js";
+
+/*! 
+ * onDomReady.js 1.2 (c) 2012 Tubal Martin - MIT license
+ */
+!function (definition) {
+    window.onDomReady = definition();
+}(function() {
+    
+    'use strict';
+
+    var win = window,
+        doc = win.document,
+        docElem = doc.documentElement,
+
+        FALSE = false,
+        COMPLETE = "complete",
+        READYSTATE = "readyState",
+        ATTACHEVENT = "attachEvent",
+        ADDEVENTLISTENER = "addEventListener",
+        DOMCONTENTLOADED = "DOMContentLoaded",
+        ONREADYSTATECHANGE = "onreadystatechange",
+
+        // W3C Event model
+        w3c = ADDEVENTLISTENER in doc,
+        top = FALSE,
+
+        // isReady: Is the DOM ready to be used? Set to true once it occurs.
+        isReady = FALSE,
+
+        // Callbacks pending execution until DOM is ready
+        callbacks = [];
+    
+    // Handle when the DOM is ready
+    function ready( fn ) {
+        if ( !isReady ) {
+            
+            // Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+            if ( !doc.body ) {
+                return defer( ready );
+            }
+            
+            // Remember that the DOM is ready
+            isReady = true;
+
+            // Execute all callbacks
+            while ( fn = callbacks.shift() ) {
+                defer( fn );
+            }
+        }    
+    }
+
+    // The document ready event handler
+    function DOMContentLoadedHandler() {
+        if ( w3c ) {
+            doc.removeEventListener( DOMCONTENTLOADED, DOMContentLoadedHandler, FALSE );
+            ready();
+        } else if ( doc[READYSTATE] === COMPLETE ) {
+            // we're here because readyState === "complete" in oldIE
+            // which is good enough for us to call the dom ready!
+            doc.detachEvent( ONREADYSTATECHANGE, DOMContentLoadedHandler );
+            ready();
+        }
+    }
+    
+    // Defers a function, scheduling it to run after the current call stack has cleared.
+    function defer( fn, wait ) {
+        // Allow 0 to be passed
+        setTimeout( fn, +wait >= 0 ? wait : 1 );
+    }
+    
+    // Attach the listeners:
+
+    // Catch cases where onDomReady is called after the browser event has already occurred.
+    // we once tried to use readyState "interactive" here, but it caused issues like the one
+    // discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
+    if ( doc[READYSTATE] === COMPLETE ) {
+        // Handle it asynchronously to allow scripts the opportunity to delay ready
+        defer( ready );
+
+    // Standards-based browsers support DOMContentLoaded    
+    } else if ( w3c ) {
+        // Use the handy event callback
+        doc[ADDEVENTLISTENER]( DOMCONTENTLOADED, DOMContentLoadedHandler, FALSE );
+
+        // A fallback to window.onload, that will always work
+        win[ADDEVENTLISTENER]( "load", ready, FALSE );
+
+    // If IE event model is used
+    } else {            
+        // ensure firing before onload,
+        // maybe late but safe also for iframes
+        doc[ATTACHEVENT]( ONREADYSTATECHANGE, DOMContentLoadedHandler );
+
+        // A fallback to window.onload, that will always work
+        win[ATTACHEVENT]( "onload", ready );
+
+        // If IE and not a frame
+        // continually check to see if the document is ready
+        try {
+            top = win.frameElement == null && docElem;
+        } catch(e) {}
+
+        if ( top && top.doScroll ) {
+            (function doScrollCheck() {
+                if ( !isReady ) {
+                    try {
+                        // Use the trick by Diego Perini
+                        // http://javascript.nwbox.com/IEContentLoaded/
+                        top.doScroll("left");
+                    } catch(e) {
+                        return defer( doScrollCheck, 50 );
+                    }
+
+                    // and execute any waiting functions
+                    ready();
+                }
+            })();
+        } 
+    } 
+    
+    function onDomReady( fn ) { 
+        // If DOM is ready, execute the function (async), otherwise wait
+        isReady ? defer( fn ) : callbacks.push( fn );
+    }
+    
+    // Add version
+    onDomReady.version = "1.2";
+    
+    return onDomReady;
+});
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/lib/serialize-form.js";var serialize_formdata = function(el){
+  var inputs = el.querySelectorAll('input,select,textarea');
+  // console.log('inputs', inputs, el);
+  var data = {};
+  for(var i=0; i< inputs.length; i++){
+    switch(inputs[i].type){
+        case 'file':
+                    var file = inputs[i].files[0];
+                    if(file){
+                      var oReader = new FileReader();
+                      (function(i){
+                        oReader.onload = function(e){
+                          data[inputs[i].name] = e.target.result;
+                          alert(JSON.stringify(data));
+                          document.querySelector('p').innerHTML = JSON.stringify(data);
+                          console.dir(data);
+                    };
+                    oReader.readAsDataURL(file);
+                    })(i)
+                    }
+
+                    break;
+        case 'checkbox':
+                    data[inputs[i].name] = inputs[i].checked;
+                    break;
+        case 'radio':
+                    if (inputs[i].checked) {
+                      data[inputs[i].name] = inputs[i].value;
+                    }
+                    break;
+        default:
+                    data[inputs[i].name] = inputs[i].value;
+
+    }
+  }
+  return data;
+}
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/lib/modal.js";Modal = (function (e) {
+    function t(i) {
+        if (n[i]) return n[i].exports;
+        var o = (n[i] = { i: i, l: !1, exports: {} });
+        return e[i].call(o.exports, o, o.exports, t), (o.l = !0), o.exports;
+    }
+    var n = {};
+    return (
+        (t.m = e),
+        (t.c = n),
+        (t.d = function (e, n, i) {
+            t.o(e, n) || Object.defineProperty(e, n, { configurable: !1, enumerable: !0, get: i });
+        }),
+        (t.n = function (e) {
+            var n =
+                e && e.__esModule
+                    ? function () {
+                          return e.default;
+                      }
+                    : function () {
+                          return e;
+                      };
+            return t.d(n, "a", n), n;
+        }),
+        (t.o = function (e, t) {
+            return Object.prototype.hasOwnProperty.call(e, t);
+        }),
+        (t.p = ""),
+        t((t.s = 0))
+    );
+})([
+    function (e, t, n) {
+        e.exports = n(1).default;
+    },
+    function (e, t, n) {
+        "use strict";
+        function i(e, t) {
+            if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function");
+        }
+        function o(e, t) {
+            if (!e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+            return !t || ("object" != typeof t && "function" != typeof t) ? e : t;
+        }
+        function s(e, t) {
+            if ("function" != typeof t && null !== t)
+                throw new TypeError("Super expression must either be null or a function, not " + typeof t);
+            (e.prototype = Object.create(t && t.prototype, {
+                constructor: { value: e, enumerable: !1, writable: !0, configurable: !0 }
+            })),
+                t && (Object.setPrototypeOf ? Object.setPrototypeOf(e, t) : (e.__proto__ = t));
+        }
+        function r(e) {
+            for (var t in e)
+                Array.isArray(e[t])
+                    ? e[t].forEach(function (e) {
+                          r(e);
+                      })
+                    : null !== e[t] && "object" === f(e[t]) && Object.freeze(e[t]);
+            return Object.freeze(e);
+        }
+        function a() {
+            return ((65536 * (1 + Math.random())) | 0).toString(16) + ((65536 * (1 + Math.random())) | 0).toString(16);
+        }
+        function l(e, t, n) {
+            var i = e.data || {};
+            if (void 0 === n) {
+                if (e.data && e.data[t]) return e.data[t];
+                var o = e.getAttribute("data-" + t);
+                return void 0 !== o ? o : null;
+            }
+            return (i[t] = n), (e.data = i), e;
+        }
+        function d(e, t) {
+            return e.nodeName
+                ? e
+                : ((e = e.replace(/(\t|\n$)/g, "")),
+                  (m.innerHTML = ""),
+                  (m.innerHTML = e),
+                  !0 === t ? m.childNodes : m.childNodes[0]);
+        }
+        function c(e) {
+            for (var t = [e]; e.parentNode; ) (e = e.parentNode), t.push(e);
+            return t;
+        }
+        Object.defineProperty(t, "__esModule", { value: !0 });
+        var h = (function () {
+                function e(e, t) {
+                    for (var n = 0; n < t.length; n++) {
+                        var i = t[n];
+                        (i.enumerable = i.enumerable || !1),
+                            (i.configurable = !0),
+                            "value" in i && (i.writable = !0),
+                            Object.defineProperty(e, i.key, i);
+                    }
+                }
+                return function (t, n, i) {
+                    return n && e(t.prototype, n), i && e(t, i), t;
+                };
+            })(),
+            u =
+                Object.assign ||
+                function (e) {
+                    for (var t = 1; t < arguments.length; t++) {
+                        var n = arguments[t];
+                        for (var i in n) Object.prototype.hasOwnProperty.call(n, i) && (e[i] = n[i]);
+                    }
+                    return e;
+                },
+            f =
+                "function" == typeof Symbol && "symbol" == typeof Symbol.iterator
+                    ? function (e) {
+                          return typeof e;
+                      }
+                    : function (e) {
+                          return e && "function" == typeof Symbol && e.constructor === Symbol && e !== Symbol.prototype
+                              ? "symbol"
+                              : typeof e;
+                      },
+            p = n(2),
+            v = (function (e) {
+                return e && e.__esModule ? e : { default: e };
+            })(p),
+            m = document.createElement("div"),
+            _ = (function () {
+                var e = void 0,
+                    t = void 0,
+                    n = void 0,
+                    i = document.createElement("div");
+                return (
+                    u(i.style, { visibility: "hidden", width: "100px" }),
+                    document.body.appendChild(i),
+                    (n = i.offsetWidth),
+                    (i.style.overflow = "scroll"),
+                    (e = document.createElement("div")),
+                    (e.style.width = "100%"),
+                    i.appendChild(e),
+                    (t = n - e.offsetWidth),
+                    document.body.removeChild(i),
+                    t
+                );
+            })(),
+            y = Object.freeze({
+                el: null,
+                animate: !0,
+                animateClass: "fade",
+                animateInClass: "show",
+                appendTo: "body",
+                backdrop: !0,
+                keyboard: !0,
+                title: !1,
+                header: !0,
+                content: !1,
+                footer: !0,
+                buttons: null,
+                headerClose: !0,
+                construct: !1,
+                transition: 300,
+                backdropTransition: 150
+            }),
+            b = r({
+                dialog: [
+                    { text: "Cancel", value: !1, attr: { class: "btn btn-default", "data-dismiss": "modal" } },
+                    { text: "OK", value: !0, attr: { class: "btn btn-primary", "data-dismiss": "modal" } }
+                ],
+                alert: [{ text: "OK", attr: { class: "btn btn-primary", "data-dismiss": "modal" } }],
+                confirm: [
+                    { text: "Cancel", value: !1, attr: { class: "btn btn-default", "data-dismiss": "modal" } },
+                    { text: "OK", value: !0, attr: { class: "btn btn-primary", "data-dismiss": "modal" } }
+                ]
+            }),
+            g = {
+                container: '<div class="modal"></div>',
+                dialog: '<div class="modal-dialog"></div>',
+                content: '<div class="modal-content"></div>',
+                header: '<div class="modal-header"></div>',
+                headerClose:
+                    '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>',
+                body: '<div class="modal-body"></div>',
+                footer: '<div class="modal-footer"></div>',
+                backdrop: '<div class="modal-backdrop"></div>'
+            },
+            k = (function (e) {
+                function t() {
+                    var e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
+                    i(this, t);
+                    var n = o(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this));
+                    if (
+                        ((n.id = a()),
+                        (n.el = null),
+                        (n._html = {}),
+                        (n._events = {}),
+                        (n._visible = !1),
+                        (n._options = u({}, t.options, e)),
+                        (n._templates = u({}, t.templates, e.templates || {})),
+                        (n._html.appendTo = document.querySelector(n._options.appendTo)),
+                        null === n._options.buttons && (n._options.buttons = t.buttons.dialog),
+                        n._options.el)
+                    ) {
+                        var s = n._options.el;
+                        if ("string" == typeof n._options.el && !(s = document.querySelector(n._options.el)))
+                            throw new Error("Selector: DOM Element " + n._options.el + " not found.");
+                        l(s, "modal", n), (n.el = s);
+                    } else n._options.construct = !0;
+                    return n._options.construct ? n._render() : n._mapDom(), n;
+                }
+                return (
+                    s(t, e),
+                    h(t, null, [
+                        {
+                            key: "alert",
+                            value: function (e) {
+                                var n = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                                return new t(
+                                    u(
+                                        {},
+                                        y,
+                                        {
+                                            title: e,
+                                            content: !1,
+                                            construct: !0,
+                                            headerClose: !1,
+                                            buttons: t.buttons.alert
+                                        },
+                                        n
+                                    )
+                                );
+                            }
+                        },
+                        {
+                            key: "confirm",
+                            value: function (e) {
+                                var n = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
+                                return new t(
+                                    u(
+                                        {},
+                                        y,
+                                        {
+                                            title: e,
+                                            content: !1,
+                                            construct: !0,
+                                            headerClose: !1,
+                                            buttons: t.buttons.confirm
+                                        },
+                                        n
+                                    )
+                                );
+                            }
+                        },
+                        {
+                            key: "templates",
+                            set: function (e) {
+                                this._baseTemplates = e;
+                            },
+                            get: function () {
+                                return u({}, g, t._baseTemplates || {});
+                            }
+                        },
+                        {
+                            key: "buttons",
+                            set: function (e) {
+                                this._baseButtons = e;
+                            },
+                            get: function () {
+                                return u({}, b, t._baseButtons || {});
+                            }
+                        },
+                        {
+                            key: "options",
+                            set: function (e) {
+                                this._baseOptions = e;
+                            },
+                            get: function () {
+                                return u({}, y, t._baseOptions || {});
+                            }
+                        },
+                        {
+                            key: "version",
+                            get: function () {
+                                return "0.8.0";
+                            }
+                        }
+                    ]),
+                    h(t, [
+                        {
+                            key: "_render",
+                            value: function () {
+                                var e = this._html,
+                                    t = this._options,
+                                    n = this._templates,
+                                    i = !!t.animate && t.animateClass;
+                                return (
+                                    (e.container = d(n.container)),
+                                    (e.dialog = d(n.dialog)),
+                                    (e.content = d(n.content)),
+                                    (e.header = d(n.header)),
+                                    (e.headerClose = d(n.headerClose)),
+                                    (e.body = d(n.body)),
+                                    (e.footer = d(n.footer)),
+                                    i && e.container.classList.add(i),
+                                    this._setHeader(),
+                                    this._setContent(),
+                                    this._setFooter(),
+                                    (this.el = e.container),
+                                    e.dialog.appendChild(e.content),
+                                    e.container.appendChild(e.dialog),
+                                    this
+                                );
+                            }
+                        },
+                        {
+                            key: "_mapDom",
+                            value: function () {
+                                var e = this._html,
+                                    t = this._options;
+                                return (
+                                    this.el.classList.contains(t.animateClass) && (t.animate = !0),
+                                    (e.container = this.el),
+                                    (e.dialog = this.el.querySelector(".modal-dialog")),
+                                    (e.content = this.el.querySelector(".modal-content")),
+                                    (e.header = this.el.querySelector(".modal-header")),
+                                    (e.headerClose = this.el.querySelector(".modal-header .close")),
+                                    (e.body = this.el.querySelector(".modal-body")),
+                                    (e.footer = this.el.querySelector(".modal-footer")),
+                                    this._setHeader(),
+                                    this._setContent(),
+                                    this._setFooter(),
+                                    this
+                                );
+                            }
+                        },
+                        {
+                            key: "_setHeader",
+                            value: function () {
+                                var e = this._html,
+                                    t = this._options;
+                                t.header &&
+                                    e.header &&
+                                    (t.title.nodeName
+                                        ? (e.header.innerHTML = t.title.outerHTML)
+                                        : "string" == typeof t.title &&
+                                          (e.header.innerHTML = '<h4 class="modal-title">' + t.title + "</h4>"),
+                                    null === this.el &&
+                                        e.headerClose &&
+                                        t.headerClose &&
+                                        e.header.appendChild(e.headerClose),
+                                    t.construct && e.content.appendChild(e.header));
+                            }
+                        },
+                        {
+                            key: "_setContent",
+                            value: function () {
+                                var e = this._html,
+                                    t = this._options;
+                                t.content &&
+                                    e.body &&
+                                    ("string" == typeof t.content
+                                        ? (e.body.innerHTML = t.content)
+                                        : (e.body.innerHTML = t.content.outerHTML),
+                                    t.construct && e.content.appendChild(e.body));
+                            }
+                        },
+                        {
+                            key: "_setFooter",
+                            value: function () {
+                                var e = this._html,
+                                    t = this._options;
+                                t.footer &&
+                                    e.footer &&
+                                    (t.footer.nodeName
+                                        ? (e.footer.innerHTML = t.footer.outerHTML)
+                                        : "string" == typeof t.footer
+                                        ? (e.footer.innerHTML = t.footer)
+                                        : e.footer.children.length ||
+                                          t.buttons.forEach(function (t) {
+                                              var n = document.createElement("button");
+                                              l(n, "button", t),
+                                                  (n.innerHTML = t.text),
+                                                  n.setAttribute("type", "button");
+                                              for (var i in t.attr) n.setAttribute(i, t.attr[i]);
+                                              e.footer.appendChild(n);
+                                          }),
+                                    t.construct && e.content.appendChild(e.footer));
+                            }
+                        },
+                        {
+                            key: "_setEvents",
+                            value: function () {
+                                var e = (this._options, this._html);
+                                (this._events.keydownHandler = this._handleKeydownEvent.bind(this)),
+                                    document.body.addEventListener("keydown", this._events.keydownHandler),
+                                    (this._events.clickHandler = this._handleClickEvent.bind(this)),
+                                    e.container.addEventListener("click", this._events.clickHandler),
+                                    (this._events.resizeHandler = this._handleResizeEvent.bind(this)),
+                                    window.addEventListener("resize", this._events.resizeHandler);
+                            }
+                        },
+                        {
+                            key: "_handleClickEvent",
+                            value: function (e) {
+                                var t = this;
+                                c(e.target).every(function (n) {
+                                    return !(
+                                        "HTML" === n.tagName ||
+                                        (!0 !== t._options.backdrop && n.classList.contains("modal")) ||
+                                        n.classList.contains("modal-content") ||
+                                        ("modal" === n.getAttribute("data-dismiss")
+                                            ? (t.emit("dismiss", t, e, l(e.target, "button")), t.hide(), 1)
+                                            : n.classList.contains("modal") &&
+                                              (t.emit("dismiss", t, e, null), t.hide(), 1))
+                                    );
+                                });
+                            }
+                        },
+                        {
+                            key: "_handleKeydownEvent",
+                            value: function (e) {
+                                27 === e.which &&
+                                    this._options.keyboard &&
+                                    (this.emit("dismiss", this, e, null), this.hide());
+                            }
+                        },
+                        {
+                            key: "_handleResizeEvent",
+                            value: function (e) {
+                                this._resize();
+                            }
+                        },
+                        {
+                            key: "show",
+                            value: function () {
+                                var e = this,
+                                    t = this._options,
+                                    n = this._html;
+                                return (
+                                    this.emit("show", this),
+                                    this._checkScrollbar(),
+                                    this._setScrollbar(),
+                                    document.body.classList.add("modal-open"),
+                                    t.construct && n.appendTo.appendChild(n.container),
+                                    (n.container.style.display = "block"),
+                                    (n.container.scrollTop = 0),
+                                    !1 !== t.backdrop
+                                        ? (this.once("showBackdrop", function () {
+                                              e._setEvents(),
+                                                  t.animate && n.container.offsetWidth,
+                                                  n.container.classList.add(t.animateInClass),
+                                                  setTimeout(function () {
+                                                      (e._visible = !0), e.emit("shown", e);
+                                                  }, t.transition);
+                                          }),
+                                          this._backdrop())
+                                        : (this._setEvents(),
+                                          t.animate && n.container.offsetWidth,
+                                          n.container.classList.add(t.animateInClass),
+                                          setTimeout(function () {
+                                              (e._visible = !0), e.emit("shown", e);
+                                          }, t.transition)),
+                                    this._resize(),
+                                    this
+                                );
+                            }
+                        },
+                        {
+                            key: "toggle",
+                            value: function () {
+                                this._visible ? this.hide() : this.show();
+                            }
+                        },
+                        {
+                            key: "_resize",
+                            value: function () {
+                                var e = this._html.container.scrollHeight > document.documentElement.clientHeight;
+                                (this._html.container.style.paddingLeft =
+                                    !this.bodyIsOverflowing && e ? _ + "px" : ""),
+                                    (this._html.container.style.paddingRight =
+                                        this.bodyIsOverflowing && !e ? _ + "px" : "");
+                            }
+                        },
+                        {
+                            key: "_backdrop",
+                            value: function () {
+                                var e = this,
+                                    t = this._html,
+                                    n = this._templates,
+                                    i = this._options,
+                                    o = !!i.animate && i.animateClass;
+                                (t.backdrop = d(n.backdrop)),
+                                    o && t.backdrop.classList.add(o),
+                                    t.container.appendChild(t.backdrop),
+                                    o && t.backdrop.offsetWidth,
+                                    t.backdrop.classList.add(i.animateInClass),
+                                    setTimeout(function () {
+                                        e.emit("showBackdrop", e);
+                                    }, this._options.backdropTransition);
+                            }
+                        },
+                        {
+                            key: "hide",
+                            value: function () {
+                                var e = this,
+                                    t = this._html,
+                                    n = this._options,
+                                    i = t.container.classList;
+                                if ((this.emit("hide", this), i.remove(n.animateInClass), n.backdrop)) {
+                                    t.backdrop.classList.remove(n.animateInClass);
+                                }
+                                return (
+                                    this._removeEvents(),
+                                    setTimeout(function () {
+                                        document.body.classList.remove("modal-open"),
+                                            (document.body.style.paddingRight = e.originalBodyPad);
+                                    }, n.backdropTransition),
+                                    setTimeout(function () {
+                                        n.backdrop && t.backdrop.parentNode.removeChild(t.backdrop),
+                                            (t.container.style.display = "none"),
+                                            n.construct && t.container.parentNode.removeChild(t.container),
+                                            (e._visible = !1),
+                                            e.emit("hidden", e);
+                                    }, n.transition),
+                                    this
+                                );
+                            }
+                        },
+                        {
+                            key: "_removeEvents",
+                            value: function () {
+                                this._events.keydownHandler &&
+                                    document.body.removeEventListener("keydown", this._events.keydownHandler),
+                                    this._html.container.removeEventListener("click", this._events.clickHandler),
+                                    window.removeEventListener("resize", this._events.resizeHandler);
+                            }
+                        },
+                        {
+                            key: "_checkScrollbar",
+                            value: function () {
+                                this.bodyIsOverflowing = document.body.clientWidth < window.innerWidth;
+                            }
+                        },
+                        {
+                            key: "_setScrollbar",
+                            value: function () {
+                                if (
+                                    ((this.originalBodyPad = document.body.style.paddingRight || ""),
+                                    this.bodyIsOverflowing)
+                                ) {
+                                    var e = parseInt(this.originalBodyPad || 0, 10);
+                                    document.body.style.paddingRight = e + _ + "px";
+                                }
+                            }
+                        }
+                    ]),
+                    t
+                );
+            })(v.default);
+        t.default = k;
+    },
+    function (e, t) {
+        function n() {
+            (this._events = this._events || {}), (this._maxListeners = this._maxListeners || void 0);
+        }
+        function i(e) {
+            return "function" == typeof e;
+        }
+        function o(e) {
+            return "number" == typeof e;
+        }
+        function s(e) {
+            return "object" == typeof e && null !== e;
+        }
+        function r(e) {
+            return void 0 === e;
+        }
+        (e.exports = n),
+            (n.EventEmitter = n),
+            (n.prototype._events = void 0),
+            (n.prototype._maxListeners = void 0),
+            (n.defaultMaxListeners = 10),
+            (n.prototype.setMaxListeners = function (e) {
+                if (!o(e) || e < 0 || isNaN(e)) throw TypeError("n must be a positive number");
+                return (this._maxListeners = e), this;
+            }),
+            (n.prototype.emit = function (e) {
+                var t, n, o, a, l, d;
+                if (
+                    (this._events || (this._events = {}),
+                    "error" === e && (!this._events.error || (s(this._events.error) && !this._events.error.length)))
+                ) {
+                    if ((t = arguments[1]) instanceof Error) throw t;
+                    var c = new Error('Uncaught, unspecified "error" event. (' + t + ")");
+                    throw ((c.context = t), c);
+                }
+                if (((n = this._events[e]), r(n))) return !1;
+                if (i(n))
+                    switch (arguments.length) {
+                        case 1:
+                            n.call(this);
+                            break;
+                        case 2:
+                            n.call(this, arguments[1]);
+                            break;
+                        case 3:
+                            n.call(this, arguments[1], arguments[2]);
+                            break;
+                        default:
+                            (a = Array.prototype.slice.call(arguments, 1)), n.apply(this, a);
+                    }
+                else if (s(n))
+                    for (a = Array.prototype.slice.call(arguments, 1), d = n.slice(), o = d.length, l = 0; l < o; l++)
+                        d[l].apply(this, a);
+                return !0;
+            }),
+            (n.prototype.addListener = function (e, t) {
+                var o;
+                if (!i(t)) throw TypeError("listener must be a function");
+                return (
+                    this._events || (this._events = {}),
+                    this._events.newListener && this.emit("newListener", e, i(t.listener) ? t.listener : t),
+                    this._events[e]
+                        ? s(this._events[e])
+                            ? this._events[e].push(t)
+                            : (this._events[e] = [this._events[e], t])
+                        : (this._events[e] = t),
+                    s(this._events[e]) &&
+                        !this._events[e].warned &&
+                        (o = r(this._maxListeners) ? n.defaultMaxListeners : this._maxListeners) &&
+                        o > 0 &&
+                        this._events[e].length > o &&
+                        ((this._events[e].warned = !0),
+                        console.error(
+                            "(node) warning: possible EventEmitter memory leak detected. %d listeners added. Use emitter.setMaxListeners() to increase limit.",
+                            this._events[e].length
+                        ),
+                        "function" == typeof console.trace && console.trace()),
+                    this
+                );
+            }),
+            (n.prototype.on = n.prototype.addListener),
+            (n.prototype.once = function (e, t) {
+                function n() {
+                    this.removeListener(e, n), o || ((o = !0), t.apply(this, arguments));
+                }
+                if (!i(t)) throw TypeError("listener must be a function");
+                var o = !1;
+                return (n.listener = t), this.on(e, n), this;
+            }),
+            (n.prototype.removeListener = function (e, t) {
+                var n, o, r, a;
+                if (!i(t)) throw TypeError("listener must be a function");
+                if (!this._events || !this._events[e]) return this;
+                if (((n = this._events[e]), (r = n.length), (o = -1), n === t || (i(n.listener) && n.listener === t)))
+                    delete this._events[e], this._events.removeListener && this.emit("removeListener", e, t);
+                else if (s(n)) {
+                    for (a = r; a-- > 0; )
+                        if (n[a] === t || (n[a].listener && n[a].listener === t)) {
+                            o = a;
+                            break;
+                        }
+                    if (o < 0) return this;
+                    1 === n.length ? ((n.length = 0), delete this._events[e]) : n.splice(o, 1),
+                        this._events.removeListener && this.emit("removeListener", e, t);
+                }
+                return this;
+            }),
+            (n.prototype.removeAllListeners = function (e) {
+                var t, n;
+                if (!this._events) return this;
+                if (!this._events.removeListener)
+                    return (
+                        0 === arguments.length ? (this._events = {}) : this._events[e] && delete this._events[e], this
+                    );
+                if (0 === arguments.length) {
+                    for (t in this._events) "removeListener" !== t && this.removeAllListeners(t);
+                    return this.removeAllListeners("removeListener"), (this._events = {}), this;
+                }
+                if (((n = this._events[e]), i(n))) this.removeListener(e, n);
+                else if (n) for (; n.length; ) this.removeListener(e, n[n.length - 1]);
+                return delete this._events[e], this;
+            }),
+            (n.prototype.listeners = function (e) {
+                return this._events && this._events[e]
+                    ? i(this._events[e])
+                        ? [this._events[e]]
+                        : this._events[e].slice()
+                    : [];
+            }),
+            (n.prototype.listenerCount = function (e) {
+                if (this._events) {
+                    var t = this._events[e];
+                    if (i(t)) return 1;
+                    if (t) return t.length;
+                }
+                return 0;
+            }),
+            (n.listenerCount = function (e, t) {
+                return e.listenerCount(t);
+            });
+    }
+]);
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/helpers/riot-helper.js";onDomReady(function() {
+    /*
+     * Load default for all widgets and fix svg sizes
+     */
+    WS.load_net("link", {
+        href: params.location + "/widget-static/" + params.widget.slug + "/themes/default.css",
+        rel: "stylesheet",
+        type: "text/css",
+    });
+    WS.load_net("link", {
+        href: params.location + "/widget-static/overrides.css",
+        rel: "stylesheet",
+        type: "text/css",
+    });
+
+    /** If there is no theme defined, use scratch by default
+     */
+    if (typeof params.widget.theme === "undefined" || params.widget.theme == "") {
+        params.widget.theme = "scratch";
+    }
+
+    /**
+     * Load theme.
+     */
+    if (params.widget.theme) {
+        WS.load_theme(params.widget.theme, params.widget.theme, params.widget.slug);
+    }
+
+    var the_widget = document.getElementById("sil-widget-" + params.wid);
+
+    if (the_widget.attributes.href) the_widget.attributes.href = "#"; // prevent linking out after loading. Remove in 2018.
+
+    the_widget.innerHTML = "<admin></admin><" + params.widget.slug + "></" + params.widget.slug + ">";
+
+    riot.mount(params.widget.slug, {
+        params: params,
+    })
+
+    //Widget Post-Mounting Event
+    var widgetMountedEvent = new Event("widget-mounted");
+
+    window.document.dispatchEvent(widgetMountedEvent);
+});
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/Widgets/star-rating/star-rating.tag.js";
+riot.tag2('reply-form', '<h4> Write a Reply: </h4> <textarea class="bawkbox-widgets-textarea" placeholder="description" name="description" cols="20" rows="10"></textarea> <button class="btn-bawkbox-widgets btn-widgets-primary" onclick="{submit_reply}">Submit Reply</button><br> <button class="btn-bawkbox-widgets btn-widgets-primary" onclick="{close}">Close</button>', 'reply-form { position: fixed; z-index: 10; top: 50%; left: 50%; width: auto; height: auto; padding: 10px; background-color: #fff; border-radius: 10px; transform: translate(-50%, -50%); -webkit-box-shadow: 6px 6px 28px 7px rgba(0,0,0,0.4); -moz-box-shadow: 6px 6px 28px 7px rgba(0,0,0,0.4); box-shadow: 6px 6px 28px 7px rgba(0,0,0,0.4); font-family: \'Inter\', \'system-ui\', Ubuntu, sans-serif; }', '', function(opts) {
+        var controller = this;
+
+        this.submit_reply = function(e) {
+            var rating = {
+                reviewer: "admin",
+                rating: null,
+                wid: opts.wid,
+                page: window.location.hostname + window.location.pathname,
+                type: "reply",
+                reply_to: opts.reply_id,
+                description: this.description.value
+            }
+            if (this.description.value == "") {
+                window.WS.modal.setModalContent({
+                    title: 'Please write a reply.',
+                    content: 'Message must not be empty.',
+                    type: 'info'
+                });
+                return;
+            }
+            store.save(rating, function (rsp) {
+                controller.parent.replying = false;
+                controller.parent.replies.data.unshift(rating);
+                controller.close();
+            });
+        }.bind(this)
+        controller.close = function () {
+            controller.parent.update({replying: false});
+            controller.unmount(true);
+        }
+});
+
+riot.tag2('star-rating', '<modal params="{opts.params}"></modal> <div if="{params.is_admin}" data-toggle="tooltip" title="Only you see this button"> <img riot-src="{opts.params.location}/images/widgets/UI/admin-button.svg" onclick="{load_admin}" class="btn-admin-panel" id="{⁗admin-btn⁗ + opts.params.wid}"> </div> <div class="ws-heading"> <virtual if="{!authoring}"> <div class="rating-average-container"> <h4 if="{num_ratings}" class="rating-average">{num_ratings} {translate(\'ratings\')}. {translate(\'On average,\')} {average_rating.toFixed(1)}</h4> <h4 if="{!num_ratings}" class="rating-average">{window.NO_RATINGS_MSG || translate(\'No one has rated this yet, be the first!\')}</h4> <div class="rating-value ws-hero" if="{num_ratings && !submitted}"> <virtual each="{val, i in [5,4,3,2,1]}"> <label class="{lit: average_rating > val - 0.5, stars-color: average_rating > val - 0.5} unchecked-stars-color"></label> <label class="half lit stars-color" if="{average_rating > val - 1 && average_rating < val}"></label> </virtual> </div> </div> </virtual> <p if="{submitted}"> <i if="{widget_tier == ⁗enterprise⁗}">{translate(\'Thanks for your review! Your review will be waiting for approval\')}</i> <i if="{!widget_tier || widget_tier == ⁗free⁗ || widget_tier == ⁗pro⁗}">{translate(\'Thanks for your review!\')}</i> </p> </div> <p if="{isWriteAllowed && !authoring && !submitted}"> <button onclick="{author}" class="btn-bawkbox-widgets btn-widgets-primary btn-write-review primary-color">{translate(\'write a review\')}</button> </p> <form onsubmit="{submit}" if="{!submitted && authoring}" class="ratings-form"> <input if="{params.widget.name_required}" type="text" placeholder="{translate(\'name of reviewer (required)\')}" class="bawkbox-widgets-input" name="reviewer" required> <input if="{!params.widget.name_required}" type="text" placeholder="{translate(\'name of reviewer\')}" class="bawkbox-widgets-input" name="reviewer"> <br style="clear:both"> <input if="{params.widget.email_required}" placeholder="{translate(\'email (required)\')}" class="bawkbox-widgets-input" name="email" required type="email"> <input if="{!params.widget.email_required}" placeholder="{translate(\'email (optional)\')}" class="bawkbox-widgets-input" name="email" type="email"> <br style="clear:both"> <input type="text" placeholder="{translate(⁗title of review⁗)}" class="bawkbox-widgets-input" name="title"> <br style="clear:both"> <fieldset class="bawk-rating"> <input type="radio" onchange="{set_rating}" id="star5" name="rating" value="5"> <label class="full" for="star5" title="Awesome - 5 stars"></label> <input type="radio" onchange="{set_rating}" id="star4" name="rating" value="4"> <label class="full" for="star4" title="Pretty good - 4 stars"></label> <input type="radio" onchange="{set_rating}" id="star3" name="rating" value="3"> <label class="full" for="star3" title="Meh - 3 stars"></label> <input type="radio" onchange="{set_rating}" id="star2" name="rating" value="2"> <label class="full" for="star2" title="Kinda bad - 2 stars"></label> <input type="radio" onchange="{set_rating}" id="star1" name="rating" value="1"> <label class="full" for="star1" title="Sucks big time - 1 star"></label> </fieldset> <br style="clear:both"> <div class="bawkbox-textarea-wrapper"> <textarea class="bawkbox-widgets-textarea" placeholder="{translate(\'message\')}" name="description" cols="30" rows="10"></textarea> <disclaimer params="{opts.params}"></disclaimer> </div> <br style="clear:both"> <button type="submit" class="btn-bawkbox-widgets btn-widgets-primary btn-align-right primary-color">{translate(\'Submit\')}</button> </form> <div class="posted-reviews-container" if="{!authoring}"> <button class="btn-cta btn-sort" if="{widget_tier == ⁗enterprise⁗}" onclick="{sort_by.bind(this, \'points\')}"> {translate(\'Sort by Points\')} </button> <button class="btn-cta btn-sort" if="{widget_tier == ⁗enterprise⁗}" onclick="{sort_by.bind(this, \'created_date \')}"> {translate(\'Sort by Date\')} </button> <div if="{parent.opts.params.is_admin && widget_tier == ⁗enterprise⁗}" class="recorded-rating" each="{rating in pending_ratings}"> <p> Pending for approval... </p> <div class="review-header"> <h5 class="review-title">{rating.title}</h5> <div class="rating-value-container"> <div class="rating-value"> <virtual each="{val, i in [5,4,3,2,1]}"> <label class="{lit: average_rating > val - 0.5, stars-color: average_rating > val - 0.5} unchecked-stars-color"></label> <label class="half lit stars-color" if="{rating > val - 1 && rating.rating < val}"></label> </virtual> </div> </div> <p class="star-rating-date"> on {new Date(rating.created_date).toISOString().slice(0, 10)} </p> </div> <p>{rating.description}</p> <p if="{rating.reviewer && rating.reviewer.value != ⁗⁗}" style="font-style: italic"> - {rating.reviewer.value || rating.reviewer} </p> <button if="{params.is_admin}" onclick="{approve_rating(rating)}" class="btn-bawkbox-widgets btn-widgets-secondary btn-approve"> Approve </button> </div> <div class="recorded-rating" each="{rating in ratings.data}"> <div class="review-header"> <h5 class="review-title">{rating.title}</h5> <div class="rating-value-container"> <div class="rating-value"> <virtual each="{val, i in [5,4,3,2,1]}"> <label class="{lit: rating.rating > val - 0.5, stars-color: rating.rating > val - 0.5} unchecked-stars-color"></label> <label class="half lit stars-color" if="{rating.rating > val - 1 && rating.rating < val}"></label> </virtual> </div> </div> <p class="star-rating-date"> on {new Date(rating.created_date).toISOString().slice(0, 10)} </p> <p class="rating-description">{rating.description}</p> <p class="rating-reviewer" if="{rating.reviewer && rating.reviewer.value != ⁗⁗}"> {rating.reviewer.value || rating.reviewer} </p> <p class="rating-reviewer" if="{!rating.reviewer && !rating.reviewer.value}"> Anonymous </p> <div class="rating-helpful-class" if="{widget_tier && widget_tier != ⁗free⁗ && params.widget.admin_rating && params.widget.admin_rating === true}"> <p> <span class="rating-helpful-counter">{count_points(rating)}</span> {translate(\'found this review helpful.\')} <a href="" if="{has_marked(rating)}" onclick="{submit_points(rating)}"> {translate(\'mark this review as helpful\')} </a> </p> </div> </div> <br> <div if="{widget_tier && widget_tier != ⁗free⁗}" each="{reply in replies.data}"> <p if="{reply.reply_to == rating._id}" style="margin-bottom:0">{reply.reviewer} - {reply.description}</p> <p class="star-rating-date" if="{reply.reply_to == rating._id}">{new Date(rating.created_date).toISOString().slice(0, 10)}</p> </div> <button if="{params.is_admin && widget_tier && widget_tier != ⁗free⁗  && params.widget.admin_responses}" onclick="{toggle_reply(rating._id)}">Reply</button> </div> <button if="{ratings.next_page}" onclick="{show_more}" class="btn-bawkbox-widgets btn-widgets-primary btn-show-more primary-color"> Show more </button> </div> <reply-form if="{widget_tier && widget_tier != ⁗free⁗}" show="{replying}" class="reply-modal" reply_id="{last_rating_replied}" wid="{opts.params.wid}"></reply-form>', 'star-rating { display: inline-block; width: 100%; max-width: 630px; float: left; padding: 2rem; box-sizing: border-box; min-height: 30rem; position: relative; margin-bottom: 2rem; z-index: 10; text-align: left; font-family: \'Inter\', \'system-ui\', Ubuntu, sans-serif; height: 100%; display: flex; flex-direction: column; } star-rating .posted-reviews-container,[data-is="star-rating"] .posted-reviews-container{ flex: 1; overflow: auto; } star-rating input[class="bawkbox-widgets-input"],[data-is="star-rating"] input[class="bawkbox-widgets-input"],star-rating fieldset[class="bawk-rating"],[data-is="star-rating"] fieldset[class="bawk-rating"],star-rating textarea[class="bawkbox-textarea-wrapper"],[data-is="star-rating"] textarea[class="bawkbox-textarea-wrapper"]{ margin-bottom: 2px; width: 100%; } star-rating .btn-admin-panel,[data-is="star-rating"] .btn-admin-panel{ width: 77px !important; cursor: pointer; position: absolute; right: 5%; top: -21px; } star-rating .bawkbox-powered-by,[data-is="star-rating"] .bawkbox-powered-by{ text-decoration: none; left: -13px !important; } star-rating .sil-widget a,[data-is="star-rating"] .sil-widget a{ color: red; } star-rating .btn-manage,[data-is="star-rating"] .btn-manage{ margin-bottom: 1.8rem; } star-rating .btn-write-review,[data-is="star-rating"] .btn-write-review{ max-width: none; float: none !important; max-width: 185px !important; margin-top: 0.5rem !important; } star-rating .btn-approve,[data-is="star-rating"] .btn-approve,star-rating .btn-show-more,[data-is="star-rating"] .btn-show-more{ float: none !important; } star-rating .btn-sort,[data-is="star-rating"] .btn-sort{ border: 0; webkit-appearance: none; margin: 5px !important; } star-rating .review-header,[data-is="star-rating"] .review-header{ display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; } star-rating .review-header .star-rating-date,[data-is="star-rating"] .review-header .star-rating-date{ font-size: 0.9rem; color: #868686; font-style: italic; } star-rating .review-header .review-title,[data-is="star-rating"] .review-header .review-title{ flex: 1 1 100%; font-weight: bold; font-size: 1.4rem; } star-rating .review-header .star-rating-date,[data-is="star-rating"] .review-header .star-rating-date{ flex: 1 1 100%; } star-rating .review-header .rating-description,[data-is="star-rating"] .review-header .rating-description{ padding-top: 0.7rem; } star-rating .review-header .rating-description,[data-is="star-rating"] .review-header .rating-description,star-rating .review-header .rating-reviewer,[data-is="star-rating"] .review-header .rating-reviewer{ color: #464646; font-size: 0.9rem; width: 100%; } star-rating .review-header .rating-reviewer,[data-is="star-rating"] .review-header .rating-reviewer{ font-weight: bold; margin-top: -0.2rem; padding-bottom: 0; margin-bottom: 0; text-align: right; } star-rating .review-header .rating-hepful-class,[data-is="star-rating"] .review-header .rating-hepful-class{ flex: 1 1 100%; color: #868686; font-style: italic; font-size: 0.8rem; } star-rating .review-header .rating-hepful-class a,[data-is="star-rating"] .review-header .rating-hepful-class a{ color: #464646; font-weight: bold; } star-rating .rating-average-container,[data-is="star-rating"] .rating-average-container{ color: #464646 !important; font-size: 1.2rem; font-weight: bold; } star-rating .ws-heading h4 { color: #464646; } star-rating .rating-average-container .rating-value,[data-is="star-rating"] .rating-average-container .rating-value{ font-size: 0.7rem; padding-right: 2rem; padding-top: 0.6rem; padding-bottom: 0.5rem; display: inline-block; } star-rating .bawk-rating,[data-is="star-rating"] .bawk-rating{ margin-top: 0.4rem; margin-left: -0.5rem; margin-bottom: -0.9rem; } star-rating fieldset,[data-is="star-rating"] fieldset,star-rating label,[data-is="star-rating"] label{ margin: 0; padding: 0; } star-rating .reply-modal,[data-is="star-rating"] .reply-modal{} star-rating .bawk-rating,[data-is="star-rating"] .bawk-rating{ border: none; float: left; } star-rating .recorded-rating,[data-is="star-rating"] .recorded-rating{ position: relative; border-top: 1px solid #ddd; padding-top: 1rem; margin-top: 0.6rem; margin-right: 8px; } star-rating .bawk-rating > input[type="radio"],[data-is="star-rating"] .bawk-rating > input[type="radio"]{ display: none; } star-rating .bawk-rating label:before,[data-is="star-rating"] .bawk-rating label:before,star-rating .rating-value label:before,[data-is="star-rating"] .rating-value label:before{ margin: 0 10px 0 0; font-size: 1.25em; font-family: FontAwesome; display: inline-block; content: "\\f005"; } star-rating .bawk-rating label:before,[data-is="star-rating"] .bawk-rating label:before{ font-size: 2em; } star-rating .bawk-rating .half:before,[data-is="star-rating"] .bawk-rating .half:before,star-rating .rating-value .half:before,[data-is="star-rating"] .rating-value .half:before{ content: "\\f089"; position: absolute; } star-rating .bawk-rating label,[data-is="star-rating"] .bawk-rating label,star-rating .rating-value label,[data-is="star-rating"] .rating-value label{ line-height: 30px; color: #ddd; float: right; } star-rating .rating-value label,[data-is="star-rating"] .rating-value label{ color: #fff; } star-rating .ws-heading h4,[data-is="star-rating"] .ws-heading h4{ font-size: 1.5em; } star-rating .recorded-rating h5,[data-is="star-rating"] .recorded-rating h5{ font-size: 1.25em; margin: 0; } star-rating .star-rating-date,[data-is="star-rating"] .star-rating-date{ clear: both; margin: 0; color: #888; } star-rating textarea,[data-is="star-rating"] textarea{ width: 100%; } star-rating .bawkbox-widgets-textarea,[data-is="star-rating"] .bawkbox-widgets-textarea{ margin-top: 0 !important; } star-rating .rating-value.ws-hero label:before,[data-is="star-rating"] .rating-value.ws-hero label:before{ font-size: 2em; } star-rating .bawk-rating > input:checked ~ label,[data-is="star-rating"] .bawk-rating > input:checked ~ label,star-rating .bawk-rating:not(:checked) > label:hover,[data-is="star-rating"] .bawk-rating:not(:checked) > label:hover,star-rating .bawk-rating:not(:checked) > label:hover ~ label,[data-is="star-rating"] .bawk-rating:not(:checked) > label:hover ~ label{ color: #FFD700; } star-rating .bawk-rating > input:checked + label:hover,[data-is="star-rating"] .bawk-rating > input:checked + label:hover,star-rating .bawk-rating > input:checked ~ label:hover,[data-is="star-rating"] .bawk-rating > input:checked ~ label:hover,star-rating .bawk-rating > label:hover ~ input:checked ~ label,[data-is="star-rating"] .bawk-rating > label:hover ~ input:checked ~ label,star-rating .bawk-rating > input:checked ~ label:hover ~ label,[data-is="star-rating"] .bawk-rating > input:checked ~ label:hover ~ label{ color: #FFED85; } star-rating .rating-value label.lit,[data-is="star-rating"] .rating-value label.lit{ color: #FFD700; } @media screen and (max-width: 768px) { star-rating .btn-write-review,[data-is="star-rating"] .btn-write-review{ margin: 0 auto !important; } star-rating .rating-value,[data-is="star-rating"] .rating-value{ margin: 0 auto; display: inline-block; font-size: 0.9rem; } star-rating .rating-value label:before,[data-is="star-rating"] .rating-value label:before,star-rating .rating-value.ws-hero label:before,[data-is="star-rating"] .rating-value.ws-hero label:before, { margin: 0 1px 0 1px; } star-rating .rating-value label,[data-is="star-rating"] .rating-value label,star-rating .rating-value.ws-hero label,[data-is="star-rating"] .rating-value.ws-hero label{ float: right; } star-rating .rating-average-container .rating-value,[data-is="star-rating"] .rating-average-container .rating-value{ padding: 0.2rem 0 0.2rem 0; font-size: 0.59rem; } star-rating .btn-admin-panel,[data-is="star-rating"] .btn-admin-panel{ top: -64px; right: 0; } star-rating disclaimer,[data-is="star-rating"] disclaimer{ min-width: 130px; right: 15px; } star-rating .bawk-rating label:before,[data-is="star-rating"] .bawk-rating label:before{ font-size: 1.4em; margin: 0 1px 0 1px; } } @media screen and (max-width: 360px) { star-rating .rating-value-container,[data-is="star-rating"] .rating-value-container{ margin-right: 0px; } star-rating .rating-value label:before,[data-is="star-rating"] .rating-value label:before,star-rating .rating-value.ws-hero label:before,[data-is="star-rating"] .rating-value.ws-hero label:before{ margin: 0 3.5px 0 3.5px; } star-rating .rating-value label,[data-is="star-rating"] .rating-value label,star-rating .rating-value.ws-hero label,[data-is="star-rating"] .rating-value.ws-hero label{ font-size: 1em; } star-rating .rating-average-container .rating-value,[data-is="star-rating"] .rating-average-container .rating-value{ font-size: 0.65rem; } star-rating disclaimer,[data-is="star-rating"] disclaimer{ min-width: 80px; max-width: 150px; right:7px; } star-rating .bawk-rating label:before,[data-is="star-rating"] .bawk-rating label:before{ font-size: 1.5em; margin: 0 2px 0 2px; } } @media screen and (max-width: 320px) { star-rating .bawk-rating label:before,[data-is="star-rating"] .bawk-rating label:before{ font-size: 1.3em; margin: 0 1px 0 1px; } star-rating .btn-admin-panel,[data-is="star-rating"] .btn-admin-panel{ top: -95px; } } @media screen and (max-width: 280px) { star-rating .rating-value label:before,[data-is="star-rating"] .rating-value label:before,star-rating .rating-value.ws-hero label:before,[data-is="star-rating"] .rating-value.ws-hero label:before{ margin: 0 3px 0 3px; } star-rating .rating-value label,[data-is="star-rating"] .rating-value label{ font-size: 0.7em; } star-rating .rating-value.ws-hero label,[data-is="star-rating"] .rating-value.ws-hero label{ font-size: 0.6em; } star-rating .bawk-rating label:before,[data-is="star-rating"] .bawk-rating label:before{ font-size: 1em; margin: 0 0.5px 0 0.5px; } star-rating .btn-admin-panel,[data-is="star-rating"] .btn-admin-panel{ top: -100px; } }', '', function(opts) {
+        let controller = this;
+        controller.translate = translate;
+        controller.params = opts.params;
+        controller.widget_tier = opts.params.widget_tier;
+        controller.replying = false;
+        controller.colors = opts.params.widget.colors || null;
+        controller.last_rating_replied;
+
+        WS.load_net("link", {
+            href: `https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css?v=${ opts.params.version }`,
+            rel: "stylesheet",
+            type: "text/css"
+        });
+
+        color.update_specific_colors({key: "unchecked-stars", selector: ".bawk-rating label",value: "color"});
+        color.update_specific_colors({key: "stars", selector: "star-rating .bawk-rating > input:checked ~ label, star-rating .bawk-rating:not(:checked) > label:hover, star-rating .bawk-rating:not(:checked) > label:hover ~ label", prop: "color"})
+        color.update_specific_colors({key: "stars", selector: "star-rating .bawk-rating > input:checked + label:hover, star-rating .bawk-rating > label:hover ~ input:checked ~ label, star-rating .bawk-rating > input:checked ~ label:hover ~ label", prop: "color"});
+
+        controller.approve_rating = function (rating) {
+            return function (e) {
+                rating.pending = false;
+                store.save(rating, function (rsp) {
+                    document.location.reload();
+                })
+            }
+        }
+
+        controller.sort_by = function (prop) {
+            controller.ratings.data.sort(function (a, b) {
+                if (a[prop] > b[prop])
+                    return -1
+                else if (a[prop] < b[prop])
+                    return 1
+                else
+                    return 0
+            })
+        }
+
+        controller.set_rating = function () {
+            controller.chose_stars = true;
+        }
+
+        controller.author = function () {
+            controller.authoring = true;
+        }
+
+        controller.submit = function (e) {
+            e.preventDefault()
+            if (!controller.chose_stars) {
+                window.WS.modal.setModalContent({
+                    title: 'Please choose a rating.',
+                    content: 'Rating must not be empty.',
+                    type: 'info'
+                });
+                return;
+            }
+            var rating = serialize_formdata(e.target);
+            rating.rating = parseFloat(rating.rating || '0');
+            rating.wid = opts.params.wid;
+            rating.page = window.location + "";
+            rating.pending = controller.widget_tier == "enterprise" && opts.params.widget.admin_approval
+                ? true
+                : false;
+            rating.type = "rating";
+            store.save(rating, function (rat) {
+                controller.submitted = true;
+                if (controller.widget_tier != "enterprise")
+                    controller.ratings.data.unshift(rat);
+                controller.authoring = false;
+                controller.num_ratings += 1;
+                controller.average_rating = (controller.total_ratings + rating.rating) / controller.num_ratings;
+                controller.update();
+            });
+        }
+
+        controller.load_ratings = function () {
+            console.log("LOADING RATINGS FOR WIDGET", opts.params.widget._id);
+            let data = {
+                pagenum: pagenum,
+                callback: function (new_ratings) {
+                    let the_ratings = controller.ratings;
+
+                    console.log("test", opts.params.widget._id + " \nlength: " + new_ratings.data.length);
+                    if (controller.ratings) {
+                        new_ratings.data = controller.ratings.data.concat(new_ratings.data);
+                    }
+                    controller.update({ratings: new_ratings});
+                    if (controller.widget_tier && controller.widget_tier == "enterprise") {
+                        controller.pending_ratings = controller.ratings.data.filter(function (rating) {
+                            return rating.type === "rating" && rating.pending === true;
+                        });
+                        controller.ratings.data = controller.ratings.data.filter(function (rating) {
+                            return rating.type === "rating" && rating.pending === false || !rating.pending && rating.type != "points" && rating.type != "reply" || !rating.type;
+                        })
+                    } else {
+                        controller.ratings.data = controller.ratings.data.filter(function (rating) {
+                            return rating.type === "rating" && rating.pending === false || !rating.pending && rating.type != "points" && rating.type != "reply" || !rating.type;
+                        })
+                    }
+                    controller.update();
+                }
+            }
+            if (opts.params.widget.choice == "all")
+                store.load_all(data, opts.params.widget._id);
+            else
+                store.load(data, opts.params.widget._id);
+            }
+
+        controller.count_ratings = function (curr_page) {
+            var data = {
+                pagenum: curr_page,
+                callback: function (new_ratings) {
+                    if (controller.all_ratings)
+                        new_ratings.data = controller.all_ratings.data.concat(new_ratings.data);
+                    controller.update({all_ratings: new_ratings});
+                    if (!controller.all_ratings.next_page) {
+                        var total_ratings = 0;
+                        var num_ratings = 0;
+
+                        if (controller.widget_tier && controller.widget_tier == "enterprise") {
+                            for (var ctr = 0; ctr < controller.all_ratings.data.length; ctr++) {
+                                if (controller.all_ratings.data[ctr].type === "rating" && controller.all_ratings.data[ctr].pending === false || !controller.all_ratings.data[ctr].pending && controller.all_ratings.data[ctr].type != "points" && controller.all_ratings.data[ctr].type != "reply" || !controller.all_ratings.data[ctr].type) {
+                                    num_ratings++;
+                                    total_ratings += controller.all_ratings.data[ctr].rating;
+                                }
+                            }
+                        } else {
+                            for (var ctr = 0; ctr < controller.all_ratings.data.length; ctr++) {
+                                if (controller.all_ratings.data[ctr].type === "rating" || !controller.all_ratings.data[ctr].type || !controller.all_ratings.data[ctr].pending && controller.all_ratings.data[ctr].type != "points" && controller.all_ratings.data[ctr].type != "reply") {
+                                    num_ratings++;
+                                    total_ratings += controller.all_ratings.data[ctr].rating;
+                                }
+                            }
+                        }
+                        controller.update_ratings(num_ratings, total_ratings);
+                    } else {
+                        return controller.count_ratings(++curr_page);
+                    }
+                }
+            }
+            if (opts.params.widget.choice == "all")
+                store.load_all(data, opts.params.widget._id);
+            else
+                store.load(data, opts.params.widget._id);
+            }
+
+        controller.update_ratings = function (num_ratings, total_ratings) {
+            controller.num_ratings = num_ratings;
+            controller.total_ratings = total_ratings
+            controller.average_rating = total_ratings / num_ratings;
+            controller.update();
+        }
+
+        var pagenum = 0;
+        controller.show_more = function () {
+            pagenum++;
+            controller.load_ratings();
+        }
+        controller.load_ratings();
+        controller.count_ratings(0);
+
+        controller.count_points = function (current_rating) {
+            var points = controller.all_ratings.data.filter(function (rating) {
+                return rating.points_to === current_rating._id;
+            }).length;
+
+            controller.ratings.data.forEach(function (rating) {
+                if (rating._id === current_rating._id) {
+                    return rating.points = points;
+                }
+            })
+            return points;
+        }
+        controller.has_marked = function (current_rating) {
+            var has_marked = controller.all_ratings.data.filter(function (rating) {
+                if (rating.type == "points") {
+                    return rating.points_to === current_rating._id && rating.sid === opts.params.sid;
+                }
+            }).length;
+            return has_marked > 0
+                ? false
+                : true;
+        }
+        controller.submit_points = function (current_rating) {
+            return function (e) {
+                var current_points = parseInt(e.target.previousElementSibling.innerText);
+                e.target.previousElementSibling.innerText = current_points + 1;
+                e.target.parentNode.removeChild(e.target);
+                var rating = {
+                    points_to: current_rating._id,
+                    sid: opts.params.sid,
+                    wid: opts.params.wid,
+                    page: window.location.hostname + window.location.pathname,
+                    rating: null,
+                    type: "points"
+                }
+                store.save(rating, function (rsp) {
+                    controller.update();
+                })
+            }
+        }
+        controller.toggle_reply = function (id) {
+            return function (e) {
+                controller.update({
+                    last_rating_replied: id,
+                    replying: !controller.replying
+                });
+            }
+        }
+        controller.load_replies = function () {
+            var data = {
+                pagenum: pagenum,
+                callback: function (new_replies) {
+                    if (controller.replies) {
+                        new_replies.data = controller.replies.data.concat(new_replies.data);
+                    }
+                    controller.update({replies: new_replies});
+                    controller.replies.data = controller.replies.data.filter(function (rating) {
+                        return rating.type === "reply";
+                    })
+                }
+            }
+            if (opts.params.widget.choice == "all")
+                store.load_all(data, opts.params.widget._id);
+            else
+                store.load(data, opts.params.widget._id);
+            }
+        controller.load_replies();
+
+        controller.on("mount", function () {
+            if (opts.params.is_admin) {
+                var admin_btn = document.getElementById("admin-btn" + opts.params.wid);
+                admin_btn.addEventListener('click', function () {
+                    load_admin(opts.params.wid);
+                });
+            }
+            controller.isWriteAllowed = isUserAuthorized(
+                opts.params.user,
+                opts.params.widget,
+                opts.params.Widget,
+                "write"
+            );
+        });
+});
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/views/disclaimer.tag.js";
+riot.tag2('disclaimer', '<a if="{!opts.params.link_removed || !opts.params.widget_tier || opts.params.widget_tier == ⁗free⁗}" href="{opts.params.homepage}" class="{opts.class}" target="_blank"> Get a {opts.params.Widget.title} widget. &copy; <object type="image/svg+xml" data="{opts.params.location}/widget-static/svg/components/widget-logo.svg" class="bawkbox-powered-by-logo"> <img riot-src="{opts.params.location}/widget-static/svg/components/widget-logo.svg" class="bawkbox-powered-by-logo"> </object> </a>', 'disclaimer { position: absolute; bottom: 1rem; right: 20px; color: #B4B4B4; font-size: 0.6rem; text-align: right; min-width: 216px; } disclaimer a { text-decoration: none; color: inherit; cursor: pointer; } disclaimer a:hover { color: #B4B4B4; }', '', function(opts) {
+});
+
+
+
+__FILE__63e92255a3d157001edcf22b = "assets/shared/views/modal.tag.js";riot.tag2('modal', '<div id="{⁗modal-main-container⁗ + opts.params.wid}" class="modal-widget fade" tabindex="-1" role="dialog"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div class="modal-title"> <h5>{modalTitle}</h5> <div if="{modalType == \'loading\'}" class="loader"></div> </div> </div> <form onsubmit="{handleSubmitTitle}"> <div if="{modalType == ⁗input⁗ || (modalContentText && modalContentText != ⁗⁗)}" class="modal-body"> <input if="{modalType == ⁗input⁗}" id="modal-input" class="bawkbox-widgets-input" type="text" name="blogTitle" required> <div class="content-container" if="{modalType !== ⁗input⁗}"> <p> {modalContentText} </p> </div> </div> <div if="{modalType != \'loading\'}" class="modal-footer"> <button if="{modalType == ⁗confirm⁗}" type="submit" class="btn btn-cancel" onclick="{handleCloseModal}"> Cancel </button> <button type="submit" class="btn btn-submit-title" onclick="{handleConfirmSubmit}"> {modalType === ⁗info⁗ ? \'OK\' : modalType === ⁗input⁗ ? \'Submit\' : \'Confirm\'} </button> </div> </form> <a if="{modalType != \'loading\'}" href="#close-modal" rel="modal:close" class="close-modal" onclick="{handleCloseModal}"> Close </a> </div> </div> </div>', 'modal .modal-title,[data-is="modal"] .modal-title{ display: flex; } modal .loader,[data-is="modal"] .loader{ border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #3498db; width: 25px; height: 25px; -webkit-animation: spin 2s linear infinite; animation: spin 2s linear infinite; margin-left: 15px; } @-webkit-keyframes spin { 0% { -webkit-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }', '', function(opts) {
+        var controller = this;
+        controller.modalTitle = "";
+        controller.modalType = "info";
+        controller.modalContentText = "";
+        controller.handleConfirmFunction = null;
+        window.WS.modal = this;
+
+        WS.load_net("link", {
+            href: opts.params.location + `/widget-static/modal/modal.css?v=${ opts.params.version }`,
+            rel: "stylesheet",
+            type: "text/css"
+        });
+
+        controller.on("mount", function () {
+            controller.modalContainer = new Modal({el: document.getElementById(`modal-main-container` + opts.params.wid)});
+        });
+
+        this.setModalContent = function(props) {
+
+            controller.resetModalContent();
+            if (props) {
+              const { title, type, content, confirmFunction } = props
+              controller.modalTitle = title ? title : 'Bawkbox Modal Title';
+              controller.modalType = type ? type : 'info';
+              controller.modalContentText = content;
+              controller.handleConfirmFunction = confirmFunction ? confirmFunction  : () => {};
+              controller.handleOpenModal();
+              controller.update();
+            }
+        }.bind(this)
+
+        this.handleConfirmSubmit = function() {
+            controller.handleConfirmFunction();
+            controller.modalContainer.hide();
+            controller.clearInput();
+        }.bind(this)
+
+        this.clearInput = function() {
+
+            if (controller.modalType == 'input') {
+                document.getElementById('modal-input').value = '';
+            }
+        }.bind(this)
+
+        this.handleOpenModal = function() {
+            controller.modalContainer.show();
+        }.bind(this)
+
+        this.handleCloseModal = function() {
+            controller.modalContainer.hide();
+            controller.clearInput();
+        }.bind(this)
+
+        this.resetModalContent = function() {
+            controller.modalTitle = '';
+            controller.modalType = 'info';
+            controller.modalContentText = '';
+            controller.handleConfirmFunction = () => {};
+        }.bind(this)
+
+});})({"debug":"lR5dUYNIvfixP0VJVTmPGj2s77u3xvdQ/63ee88f97dcd30f9116378bc","wid":"63ee893584aa460014379fbc","host":"bawkbox.com","user":{},"homepage":"https://bawkbox.com/install/star-rating","sid":null,"is_admin":false,"link_removed":false,"widget":{"_id":"63ee893584aa460014379fbc","not_saved":true,"user_id":"63ee88f97dcd30f9116378bc","slug":"star-rating","first_installed_date":"2023-02-16T19:52:19.141Z","colors":{"primary":null,"primary-text":null,"secondary":null,"secondary-text":null,"text":"#ff0000","stars":"#ff0000","unchecked-stars":"#dbdbdb"},"name":"","theme":"scratch","permissions":{"write":"any"},"pagesize":69,"bawkbox_branding":false,"pageviews":103},"Widget":{"title":"Customer Reviews","slug":"star-rating","riot":true,"admin":{},"microdata":true,"libs":["nanoajax","ondomready","serialize-form","modal"],"heading":"Customer Reviews","data-filter":[{"field":"type","value":"all","header":"All"},{"field":"type","value":"rating","header":"Ratings"},{"field":"type","value":"points","header":"Points"},{"field":"type","value":"replies","header":"Replies"}],"settings":[{"fieldlabel":"Load All Ratings","fieldtype":"radio","fieldname":"choice","fieldvalue":"all"},{"fieldlabel":"Load by Page","fieldtype":"radio","fieldname":"choice","fieldvalue":"page"},{"fieldlabel":"Name Required","fieldtype":"checkbox","fieldname":"name_required","tier":"pro and enterprise"},{"fieldlabel":"Email Required","fieldtype":"checkbox","fieldname":"email_required","tier":"pro and enterprise"},{"fieldlabel":"Allow Admin Responses","fieldtype":"checkbox","fieldname":"admin_responses","tier":"pro and enterprise"},{"fieldlabel":"Allow Mark as Rating for each Review","fieldtype":"checkbox","fieldname":"admin_rating","tier":"pro and enterprise"},{"fieldlabel":"Require Approval to Post Review","fieldtype":"checkbox","fieldname":"admin_approval","tier":"enterprise"}],"translations":{"No one has rated this yet, be the first!":"","write a review":"","name of reviewer":"","name of reviewer (required)":"","email (optional)":"","email (required)":"","title of review":"","message":"","Submit":"","Thanks for your review!":"","ratings":"","On average,":"","Sort by Points":"","Sort by Date":"","found this review helpful!":"","mark this review as helpful":"","Thanks for your review! Your review will be waiting for approval":""},"colors":[{"selector":"stars","rule":"color"},{"selector":"unchecked-stars","rule":"color"}],"permissions":{"write":"any","read":"any","del":"admin"},"header":"Get Reviews on Your Products and Services","teaser":"This review widget can help you capture feedback and create social proof.","features":[{"header":"Easy Installation","teaser":"Installing BawkBox Reviews is easy and headache-free."},{"header":"Built-in Moderation","teaser":"Remove reviews in a few simple clicks with our simple moderation dashboard."},{"header":"Increase Engagement","teaser":"BawkBox reviews engages your users by providing social proof of your business or product."}],"tiers":{"free":{"header":"Free","benefits":["Unlimited Free Reviews","Users Can Add a Description","Includes Email Notification","Data Export","Unlimited Use of All Widgets"],"price":"$0","button":"Get Started"},"pro":{"header":"Pro","benefits":["Includes Everything in Free","Reply to a Review as an Admin","Users Can Like reviews","Admin Responses","Review Points","Email Support","Remove BawkBox Branding"],"price":"$5","button":"Start your free trial"},"enterprise":{"header":"Enterprise","benefits":["Includes Everything in Pro","25% Discount on All Customization Work","Reviews Sorting","Allows Review Moderation","Priority Email Support"],"price":"$15","button":"Start your free trial"}},"final-cta":"Start showcasing user reviews now","interaction-strings":[{"field":"type","value":"rating","header":"Ratings"},{"field":"pending","value":true,"header":"Pending Ratings"},{"field":"type","value":"points","header":"Marked Helpful Reviews"}],"url":"bawkbox.com/install/star-rating"},"widget_tier":"free","demo_mode":false,"field_settings":{"toggle_switch":{"yes_value":"true","no_value":""}},"version":"b734b4da"});
